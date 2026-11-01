@@ -1,12 +1,11 @@
 """Progress repository for database operations."""
-from datetime import datetime
 from typing import Any
 
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pymongo import DESCENDING
 
-from app.core.exceptions import ConflictError, NotFoundError
+from app.core.exceptions import NotFoundError
 
 
 class ProgressRepository:
@@ -43,7 +42,7 @@ class ProgressRepository:
                 return_document=True,
             )
             return result
-        except Exception as e:
+        except Exception:
             raise
 
     async def unmark_episode(

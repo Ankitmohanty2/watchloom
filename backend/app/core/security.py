@@ -1,5 +1,5 @@
 """Security utilities for authentication and password hashing."""
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import jwt
@@ -26,9 +26,9 @@ def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = 
     """Create a JWT access token."""
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
+        expire = datetime.now(UTC) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(
+        expire = datetime.now(UTC) + timedelta(
             minutes=settings.jwt_access_token_expire_minutes
         )
     to_encode.update({"exp": expire, "type": "access"})
@@ -38,7 +38,7 @@ def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = 
 def create_refresh_token(data: dict[str, Any]) -> str:
     """Create a JWT refresh token."""
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(days=settings.jwt_refresh_token_expire_days)
+    expire = datetime.now(UTC) + timedelta(days=settings.jwt_refresh_token_expire_days)
     to_encode.update({"exp": expire, "type": "refresh"})
     return jwt.encode(
         to_encode, settings.refresh_token_secret, algorithm=settings.jwt_algorithm
@@ -61,7 +61,7 @@ def decode_token(token: str, token_type: str = "access") -> dict[str, Any]:
 
 def create_verification_token(email: str) -> str:
     """Create a token for email verification."""
-    expire = datetime.now(timezone.utc) + timedelta(hours=24)
+    expire = datetime.now(UTC) + timedelta(hours=24)
     to_encode = {"sub": email, "exp": expire, "type": "verification"}
     return jwt.encode(to_encode, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
 
@@ -79,7 +79,7 @@ def verify_verification_token(token: str) -> str | None:
 
 def create_password_reset_token(email: str) -> str:
     """Create a token for password reset."""
-    expire = datetime.now(timezone.utc) + timedelta(hours=1)
+    expire = datetime.now(UTC) + timedelta(hours=1)
     to_encode = {"sub": email, "exp": expire, "type": "password_reset"}
     return jwt.encode(to_encode, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
 

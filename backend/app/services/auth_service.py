@@ -1,10 +1,9 @@
 """Authentication service."""
 import hashlib
-from datetime import datetime
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from app.core.exceptions import AuthenticationError, ConflictError, ValidationError
+from app.core.exceptions import AuthenticationError, ConflictError
 from app.core.security import (
     create_access_token,
     create_refresh_token,
@@ -122,8 +121,8 @@ class AuthService:
                 "access_token": new_access_token,
                 "refresh_token": new_refresh_token,
             }
-        except Exception:
-            raise AuthenticationError("Invalid refresh token")
+        except Exception as e:
+            raise AuthenticationError("Invalid refresh token") from e
 
     async def logout(self, refresh_token: str) -> None:
         """Revoke refresh token."""

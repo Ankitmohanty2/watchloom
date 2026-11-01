@@ -1,6 +1,7 @@
 """AniList API client."""
-import httpx
 from typing import Any
+
+import httpx
 
 from app.core.config import settings
 from app.core.exceptions import ExternalAPIError
@@ -35,15 +36,15 @@ class AniListClient:
                     raise ExternalAPIError("AniList API error")
 
                 return data.get("data", {})
-        except httpx.TimeoutException:
+        except httpx.TimeoutException as e:
             logger.error("AniList API timeout")
-            raise ExternalAPIError("AniList API timeout")
+            raise ExternalAPIError("AniList API timeout") from e
         except httpx.HTTPStatusError as e:
             logger.error(f"AniList API error: {e}")
-            raise ExternalAPIError(f"AniList API error: {e.response.status_code}")
+            raise ExternalAPIError(f"AniList API error: {e.response.status_code}") from e
         except Exception as e:
             logger.error(f"AniList API unexpected error: {e}")
-            raise ExternalAPIError("AniList API error")
+            raise ExternalAPIError("AniList API error") from e
 
     def _get_trailer_url(self, trailer: dict[str, Any] | None) -> str | None:
         if not trailer or str(trailer.get("site") or "").lower() != "youtube" or not trailer.get("id"):

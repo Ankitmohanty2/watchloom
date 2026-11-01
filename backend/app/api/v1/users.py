@@ -1,10 +1,9 @@
 """User API routes."""
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 
 from app.api.dependencies import CurrentUser, CurrentUserId
 from app.db.mongodb import get_database
 from app.repositories.user_repository import UserRepository
-from app.schemas.common import SuccessResponse
 from app.schemas.user import UpdatePreferencesRequest, UpdateUserRequest, UserResponse
 
 router = APIRouter(prefix="/users", tags=["Users"])

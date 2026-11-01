@@ -1,23 +1,13 @@
 """Pytest configuration and fixtures."""
-import asyncio
-from typing import AsyncGenerator, Generator
+from collections.abc import AsyncGenerator
 
-import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.core.config import settings
+from app.db.mongodb import get_database
 from app.main import app
-
-
-# Event loop fixture
-@pytest.fixture(scope="session")
-def event_loop() -> Generator:
-    """Create event loop for async tests."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
 
 
 # Test database
@@ -38,13 +28,20 @@ async def test_db():
 
 # HTTP client fixture
 @pytest_asyncio.fixture(scope="function")
-async def client() -> AsyncGenerator:
+async def client(test_db) -> AsyncGenerator:
     """Create test HTTP client."""
-    async with AsyncClient(
-        transport=ASGITransport(app=app),
-        base_url="http://test",
-    ) as ac:
-        yield ac
+    async def override_get_database():
+        return test_db
+
+    app.dependency_overrides[get_database] = override_get_database
+    try:
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as ac:
+            yield ac
+    finally:
+        app.dependency_overrides.pop(get_database, None)
 
 
 # Helper fixture for authenticated requests

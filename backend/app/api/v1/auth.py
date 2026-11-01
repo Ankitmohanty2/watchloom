@@ -1,5 +1,5 @@
 """Authentication API routes."""
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 
 from app.api.dependencies import AuthServiceDep, CurrentUser
 from app.core.exceptions import AuthenticationError, ConflictError, ValidationError
@@ -36,9 +36,9 @@ async def signup(
             "token_type": "bearer",
         }
     except ConflictError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
     except ValidationError as e:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)) from e
 
 
 @router.post("/login", response_model=dict)
@@ -59,7 +59,7 @@ async def login(
             "token_type": "bearer",
         }
     except AuthenticationError as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e)) from e
 
 
 @router.post("/refresh", response_model=TokenResponse)
@@ -72,7 +72,7 @@ async def refresh_token(
         result = await auth_service.refresh_access_token(request.refresh_token)
         return TokenResponse(**result)
     except AuthenticationError as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e)) from e
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)

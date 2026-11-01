@@ -1,6 +1,7 @@
 """TMDB API client."""
-import httpx
 from typing import Any
+
+import httpx
 
 from app.core.config import settings
 from app.core.exceptions import ExternalAPIError
@@ -38,19 +39,19 @@ class TMDBClient:
                 response = await client.get(url, params=params)
                 response.raise_for_status()
                 return response.json()
-        except httpx.TimeoutException:
+        except httpx.TimeoutException as e:
             logger.error(f"TMDB API timeout: {endpoint}")
-            raise ExternalAPIError("TMDB API timeout")
+            raise ExternalAPIError("TMDB API timeout") from e
         except httpx.HTTPStatusError as e:
             # Avoid logging the request URL because it contains the API key.
             logger.error("TMDB API error for %s: HTTP %s", endpoint, e.response.status_code)
-            raise ExternalAPIError(f"TMDB API error: {e.response.status_code}")
+            raise ExternalAPIError(f"TMDB API error: {e.response.status_code}") from e
         except httpx.RequestError as e:
             logger.error("TMDB connection failed for %s (%s)", endpoint, type(e).__name__)
-            raise ExternalAPIError("TMDB API connection failed")
+            raise ExternalAPIError("TMDB API connection failed") from e
         except Exception as e:
             logger.error("TMDB API unexpected error for %s (%s)", endpoint, type(e).__name__)
-            raise ExternalAPIError("TMDB API error")
+            raise ExternalAPIError("TMDB API error") from e
 
     def _select_trailer_url(self, videos: list[dict[str, Any]]) -> str | None:
         youtube_trailers = [

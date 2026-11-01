@@ -1,7 +1,7 @@
 """Application configuration using Pydantic Settings."""
 from typing import Any
 
-from pydantic import field_validator, MongoDsn
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

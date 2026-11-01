@@ -52,7 +52,7 @@ async def unmark_episode(
             current_user_id, media_id, season_number, episode_number
         )
     except NotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 @router.get("/continue-watching")

@@ -24,7 +24,7 @@ class LibraryRepository:
             return library_data
         except Exception as e:
             if "duplicate key error" in str(e):
-                raise ConflictError("Media already in library")
+                raise ConflictError("Media already in library") from e
             raise
 
     async def find_by_user_and_media(

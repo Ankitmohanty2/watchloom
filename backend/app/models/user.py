@@ -2,8 +2,6 @@
 from datetime import datetime
 from typing import Any
 
-from bson import ObjectId
-
 
 class UserModel:
     """User document model for MongoDB."""

@@ -5,7 +5,6 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from app.core.config import settings
 from app.core.exceptions import AuthenticationError
 from app.core.security import decode_token
 from app.db.mongodb import get_database
@@ -31,18 +30,18 @@ async def get_current_user_id(
         if user_id is None:
             raise AuthenticationError("Invalid authentication credentials")
         return user_id
-    except jwt.InvalidTokenError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    except jwt.ExpiredSignatureError:
+    except jwt.ExpiredSignatureError as error:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from error
+    except jwt.InvalidTokenError as error:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from error
 
 
 async def get_current_user(
@@ -58,7 +57,7 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=str(e),
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
 
 
 # Type aliases for cleaner dependency injection

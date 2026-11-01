@@ -8,9 +8,7 @@ from app.schemas.common import SuccessResponse
 from app.schemas.library import (
     AddToLibraryRequest,
     BulkUpdateRequest,
-    LibraryFilterParams,
     LibraryResponse,
-    LibraryStatsResponse,
     UpdateLibraryRequest,
 )
 from app.services.library_service import LibraryService
@@ -47,9 +45,9 @@ async def add_to_library(
         )
         return result
     except ConflictError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
     except NotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 @router.patch("/{item_id}", response_model=LibraryResponse)
@@ -66,7 +64,7 @@ async def update_library_entry(
         result = await library_service.update_library_entry(item_id, current_user_id, update_data)
         return result
     except NotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -80,7 +78,7 @@ async def remove_from_library(
         library_service = LibraryService(db)
         await library_service.remove_from_library(item_id, current_user_id)
     except NotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 @router.post("/bulk-update", response_model=SuccessResponse)

@@ -4,8 +4,6 @@ from typing import Any
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from app.models.media import MediaModel
-
 
 class MediaRepository:
     """Repository for media database operations."""

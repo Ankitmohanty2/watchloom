@@ -5,7 +5,6 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.core.exceptions import ConflictError, NotFoundError
 from app.models.library import LibraryModel
-from app.models.media import MediaModel
 from app.repositories.library_repository import LibraryRepository
 from app.repositories.media_repository import MediaRepository
 from app.utils.pagination import get_skip_limit
