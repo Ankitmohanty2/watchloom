@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --background-rgb: 11 13 18;
+  --foreground-rgb: 247 242 223;
+  --foreground-strong-rgb: 255 248 230;
+  --surface-rgb: 17 20 27;
+  --surface-alt-rgb: 13 19 34;
+  --surface-hover-rgb: 23 26 34;
+  --muted-rgb: 170 183 210;
+  --muted-foreground-rgb: 142 155 181;
+  --accent-foreground-rgb: 225 201 94;
+  --brand-muted-rgb: 201 184 102;
+  --border-rgb: 255 255 255;
+  --hover-rgb: 255 255 255;
+}
+
+:root[data-theme='light'],
+:root.light {
+  color-scheme: light;
+  --background-rgb: 246 247 249;
+  --foreground-rgb: 53 61 74;
+  --foreground-strong-rgb: 22 29 40;
+  --surface-rgb: 255 255 255;
+  --surface-alt-rgb: 239 242 246;
+  --surface-hover-rgb: 229 233 239;
+  --muted-rgb: 82 92 108;
+  --muted-foreground-rgb: 106 116 131;
+  --accent-foreground-rgb: 126 91 0;
+  --brand-muted-rgb: 126 91 0;
+  --border-rgb: 43 52 66;
+  --hover-rgb: 25 34 48;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply antialiased;
+    background-color: rgb(var(--background-rgb));
+    color: rgb(var(--foreground-rgb));
+    min-width: 320px;
+    transition: background-color 180ms ease, color 180ms ease;
+  }
+
+  a,
+  button,
+  input,
+  select {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  ::selection {
+    background: #ffd93d;
+    color: #11141b;
+  }
+}
+
+@layer utilities {
+  .container-custom {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+}
+
+/* Force the semantic app surfaces to honor Light mode even where legacy
+   Tailwind utilities or component defaults still carry a dark palette. */
+html.light body,
+html.light #root {
+  background-color: #f6f7f9 !important;
+  color: #353d4a !important;
+}
+
+html.light .bg-background {
+  background-color: #f6f7f9 !important;
+}
+
+html.light .bg-surface {
+  background-color: #ffffff !important;
+}
+
+html.light .bg-surface-alt {
+  background-color: #eff2f6 !important;
+}
+
+html.light .bg-surface-hover {
+  background-color: #e5e9ef !important;
+}
+
+html.light .text-foreground {
+  color: #353d4a !important;
+}
+
+html.light .text-foreground-strong {
+  color: #161d28 !important;
+}
+
+html.light .text-muted {
+  color: #525c6c !important;
+}
+
+html.light .text-muted-foreground {
+  color: #6a7483 !important;
+}
+
+html.light .text-accent-foreground,
+html.light .text-brand-muted {
+  color: #765400 !important;
+}
+
+html.light .border-border {
+  border-color: rgb(43 52 66 / 14%) !important;
+}
+
+html.light .app-header {
+  background-color: rgb(246 247 249 / 96%) !important;
+  border-color: rgb(43 52 66 / 12%) !important;
+}
+
+html.light footer {
+  background-color: #eff2f6 !important;
+  color: #353d4a !important;
+}
+
+.theme-preview-light {
+  --background-rgb: 246 247 249;
+  --foreground-rgb: 53 61 74;
+  --foreground-strong-rgb: 22 29 40;
+  --surface-rgb: 255 255 255;
+  --surface-alt-rgb: 239 242 246;
+  --surface-hover-rgb: 229 233 239;
+  --muted-rgb: 82 92 108;
+  --muted-foreground-rgb: 106 116 131;
+  --accent-foreground-rgb: 126 91 0;
+  --brand-muted-rgb: 126 91 0;
+  --border-rgb: 43 52 66;
+  background-color: rgb(var(--surface-rgb));
+}
+
+.theme-preview-dark {
+  --background-rgb: 11 13 18;
+  --foreground-rgb: 247 242 223;
+  --foreground-strong-rgb: 255 248 230;
+  --surface-rgb: 17 20 27;
+  --surface-alt-rgb: 13 19 34;
+  --surface-hover-rgb: 23 26 34;
+  --muted-rgb: 170 183 210;
+  --muted-foreground-rgb: 142 155 181;
+  --accent-foreground-rgb: 225 201 94;
+  --brand-muted-rgb: 201 184 102;
+  --border-rgb: 255 255 255;
+  background-color: rgb(var(--surface-rgb));
+}
