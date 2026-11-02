@@ -2,6 +2,9 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# Container deployments should run with production settings by default.
+ENV ENVIRONMENT=production
+
 # Copy requirements first for better caching
 COPY requirements.txt .
 

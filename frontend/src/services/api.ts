@@ -1,8 +1,15 @@
 import axios from 'axios'
 import { useAuthStore } from '@/store/authStore'
 
+const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/+$/, '')
+const apiBaseUrl = import.meta.env.PROD
+  ? configuredApiBaseUrl?.startsWith('https://')
+    ? configuredApiBaseUrl
+    : 'https://watchloom.onrender.com'
+  : configuredApiBaseUrl || 'http://localhost:8000'
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+  baseURL: apiBaseUrl,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -36,7 +43,7 @@ api.interceptors.response.use(
         const refreshToken = useAuthStore.getState().refreshToken
         if (refreshToken) {
           const response = await axios.post(
-            `${import.meta.env.VITE_API_BASE_URL}/api/v1/auth/refresh`,
+            `${apiBaseUrl}/api/v1/auth/refresh`,
             { refresh_token: refreshToken }
           )
           const { access_token, refresh_token } = response.data

@@ -29,6 +29,7 @@ services:
       - TMDB_API_KEY=${TMDB_API_KEY}
       - ANILIST_API_URL=https://graphql.anilist.co
       - FRONTEND_URL=${FRONTEND_URL}
+      - CORS_ORIGINS=["https://watchloom.ankitmohanty.in","http://localhost:5173","http://localhost:3000"]
       - COOKIE_SECURE=true
       - ENVIRONMENT=production
     depends_on:
