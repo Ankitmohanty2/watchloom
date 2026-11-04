@@ -94,4 +94,23 @@ async def create_indexes(db: AsyncIOMotorDatabase) -> None:
     await db.email_verification_tokens.create_indexes(verification_indexes)
     logger.info("Created email_verification_tokens indexes")
 
+    # Short-lived password change email codes.
+    password_change_indexes = [
+        IndexModel([("user_id", ASCENDING)], unique=True, name="password_change_user_unique"),
+        IndexModel([("expires_at", ASCENDING)], expireAfterSeconds=0, name="password_change_expires_at_ttl"),
+    ]
+    await db.password_change_otps.create_indexes(password_change_indexes)
+    logger.info("Created password_change_otps indexes")
+
+    # Public Watchloom feedback; one editable entry per account.
+    feedback_indexes = [
+        IndexModel([("user_id", ASCENDING)], unique=True, name="feedback_user_unique"),
+        IndexModel(
+            [("is_public", ASCENDING), ("updated_at", DESCENDING)],
+            name="feedback_public_updated_at",
+        ),
+    ]
+    await db.site_feedback.create_indexes(feedback_indexes)
+    logger.info("Created site_feedback indexes")
+
     logger.info("All indexes created successfully")

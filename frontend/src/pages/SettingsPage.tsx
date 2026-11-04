@@ -50,10 +50,13 @@ const SettingsPage = () => {
           </section>
 
           <section className="rounded-xl border border-border/[0.08] bg-surface p-5 sm:p-6">
-            <h2 className="font-display text-lg font-semibold text-foreground-strong">Privacy</h2>
-            <p className="mt-1 text-sm leading-6 text-muted">Read how account information and watch history are handled.</p>
-            <Link to="/privacy" className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-foreground transition hover:text-foreground-strong">
-              Privacy policy <ArrowUpRight className="h-4 w-4" />
+            <h2 className="font-display text-lg font-semibold text-foreground-strong">About &amp; credits</h2>
+            <p className="mt-1 text-sm leading-6 text-muted">Learn about Watchloom and the catalog sources behind it.</p>
+            <Link to="/about" className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-foreground transition hover:text-foreground-strong">
+              About Watchloom <ArrowUpRight className="h-4 w-4" />
+            </Link>
+            <Link to="/terms" className="ml-5 mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-foreground transition hover:text-foreground-strong">
+              Terms &amp; conditions <ArrowUpRight className="h-4 w-4" />
             </Link>
           </section>
 

@@ -11,6 +11,8 @@ A full-stack web application for discovering, tracking, and managing anime, movi
 - ⭐ **Ratings & Notes** - Rate content and add personal notes
 - 🎨 **Clean Design** - Minimalist, accessible interface
 - 🔐 **Secure Authentication** - JWT-based auth with refresh tokens
+- 🖼️ **Profile Photos** - Upload and manage a personal account avatar
+- ✉️ **Email OTP Password Changes** - Verify password changes with a short-lived email code
 - 🌙 **Dark Mode** - Toggle between light and dark themes
 
 ## Technology Stack
@@ -132,7 +134,18 @@ TMDB_API_KEY=your-tmdb-api-key-here
 # Other settings
 FRONTEND_URL=http://localhost:5173
 ENVIRONMENT=development
+
+# Outbound SMTP (required to deliver password-change codes)
+SMTP_HOST=smtp.resend.com
+SMTP_PORT=587
+SMTP_USERNAME=resend
+SMTP_PASSWORD=your-resend-api-key
+SMTP_FROM_EMAIL=notifications@your-verified-domain.com
+SMTP_USE_SSL=false
+SMTP_STARTTLS=true
 ```
+
+For production, add the SMTP values to the **backend service** environment in Render. Resend requires a verified sending domain; use its API key as the SMTP password and a sender address on that verified domain. Keep the key private and out of frontend variables and source control. The password-change code expires after 10 minutes; the server limits resends and failed attempts.
 
 ### Frontend Environment Variables
 

@@ -10,6 +10,17 @@ from app.services.progress_service import ProgressService
 router = APIRouter(prefix="/progress", tags=["Progress"])
 
 
+@router.get("/continue-watching")
+async def get_continue_watching(
+    current_user_id: CurrentUserId,
+    db=Depends(get_database),
+):
+    """Get the user's recently watched titles for the home page rail."""
+    progress_service = ProgressService(db)
+    results = await progress_service.get_continue_watching(current_user_id)
+    return {"results": results}
+
+
 @router.get("/{media_id}", response_model=MediaProgressResponse)
 async def get_media_progress(
     media_id: str,
@@ -53,14 +64,3 @@ async def unmark_episode(
         )
     except NotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
-
-
-@router.get("/continue-watching")
-async def get_continue_watching(
-    current_user_id: CurrentUserId,
-    db=Depends(get_database),
-):
-    """Get continue watching list."""
-    progress_service = ProgressService(db)
-    results = await progress_service.get_continue_watching(current_user_id)
-    return {"results": results}

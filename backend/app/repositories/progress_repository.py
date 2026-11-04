@@ -87,6 +87,7 @@ class ProgressRepository:
                     "total_watched": {"$sum": 1},
                 }
             },
+            {"$sort": {"last_watched_episode.watched_at": DESCENDING}},
             {"$limit": limit},
         ]
         return await self.collection.aggregate(pipeline).to_list(length=limit)

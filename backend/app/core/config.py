@@ -35,6 +35,15 @@ class Settings(BaseSettings):
     tmdb_api_key: str
     anilist_api_url: str = "https://graphql.anilist.co"
 
+    # Outbound email (required for email OTP flows)
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_username: str | None = None
+    smtp_password: str | None = None
+    smtp_from_email: str | None = None
+    smtp_use_ssl: bool = False
+    smtp_starttls: bool = True
+
     # CORS
     frontend_url: str = "http://localhost:5173"
     cors_origins: list[str] = ["http://localhost:5173", "http://localhost:3000"]

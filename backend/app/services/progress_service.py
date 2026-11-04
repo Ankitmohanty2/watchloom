@@ -3,6 +3,7 @@ from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from app.models.media import MediaModel
 from app.models.progress import ProgressModel
 from app.repositories.progress_repository import ProgressRepository
 
@@ -39,5 +40,31 @@ class ProgressService:
 
     async def get_continue_watching(self, user_id: str, limit: int = 10) -> list[dict[str, Any]]:
         """Get continue watching list."""
-        results = await self.progress_repo.get_continue_watching(user_id, limit)
+        grouped_progress = await self.progress_repo.get_continue_watching(user_id, limit)
+        if not grouped_progress:
+            return []
+
+        media_ids = [item["_id"] for item in grouped_progress]
+        media_documents = await self.db.media.find({"_id": {"$in": media_ids}}).to_list(length=len(media_ids))
+        media_by_id = {media_doc["_id"]: media_doc for media_doc in media_documents}
+        results = []
+
+        for item in grouped_progress:
+            media_doc = media_by_id.get(item["_id"])
+            if not media_doc:
+                continue
+
+            last_episode = item["last_watched_episode"]
+            results.append(
+                {
+                    "media": MediaModel.to_dict(media_doc),
+                    "last_watched_episode": {
+                        "season_number": last_episode["season_number"],
+                        "episode_number": last_episode["episode_number"],
+                        "watched_at": last_episode["watched_at"],
+                    },
+                    "total_watched": item["total_watched"],
+                }
+            )
+
         return results

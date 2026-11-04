@@ -1,5 +1,5 @@
 import api from './api'
-import type { EpisodeProgress } from '@/types'
+import type { ContinueWatchingItem, EpisodeProgress } from '@/types'
 
 export const progressService = {
   async getMediaProgress(mediaId: string) {
@@ -23,8 +23,8 @@ export const progressService = {
     await api.delete(`/api/v1/progress/${mediaId}/episodes/${seasonNumber}/${episodeNumber}`)
   },
 
-  async getContinueWatching() {
+  async getContinueWatching(): Promise<ContinueWatchingItem[]> {
     const response = await api.get('/api/v1/progress/continue-watching')
-    return response.data
+    return response.data.results
   },
 }

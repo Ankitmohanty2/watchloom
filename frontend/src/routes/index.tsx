@@ -20,8 +20,8 @@ import LibraryPage from '@/pages/LibraryPage'
 import StatisticsPage from '@/pages/StatisticsPage'
 import ProfilePage from '@/pages/ProfilePage'
 import SettingsPage from '@/pages/SettingsPage'
-import PrivacyPage from '@/pages/PrivacyPage'
 import TermsPage from '@/pages/TermsPage'
+import AboutPage from '@/pages/AboutPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -46,7 +46,7 @@ export const AppRouter = () => {
         <Route path="series" element={<SeriesPage />} />
         <Route path="media/:id" element={<MediaDetailsPage />} />
         <Route path="media/fetch" element={<MediaFetchPage />} />
-        <Route path="privacy" element={<PrivacyPage />} />
+        <Route path="about" element={<AboutPage />} />
         <Route path="terms" element={<TermsPage />} />
       </Route>
 

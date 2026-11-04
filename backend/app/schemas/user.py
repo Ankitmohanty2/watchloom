@@ -1,6 +1,6 @@
 """User Pydantic schemas."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class UserPreferences(BaseModel):
@@ -55,3 +55,19 @@ class UpdatePrivacyRequest(BaseModel):
 
     profile_public: bool | None = None
     library_public: bool | None = None
+
+
+class ChangePasswordRequest(BaseModel):
+    """Password update request verified with the account email OTP."""
+
+    code: str = Field(..., min_length=6, max_length=6, pattern=r"^\d{6}$")
+    password: str = Field(..., min_length=8, max_length=100)
+    confirm_password: str = Field(..., min_length=8, max_length=100)
+
+    @field_validator("confirm_password")
+    @classmethod
+    def passwords_match(cls, value: str, info) -> str:
+        """Require matching password values."""
+        if "password" in info.data and value != info.data["password"]:
+            raise ValueError("Passwords do not match")
+        return value

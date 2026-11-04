@@ -72,6 +72,16 @@ export interface EpisodeProgress {
   updated_at: string
 }
 
+export interface ContinueWatchingItem {
+  media: Media
+  last_watched_episode: {
+    season_number: number
+    episode_number: number
+    watched_at: string
+  }
+  total_watched: number
+}
+
 export interface LibraryStats {
   total_titles: number
   plan_to_watch: number
@@ -109,6 +119,14 @@ export interface PaginatedResponse<T> {
   page: number
   limit: number
   total_pages: number
+}
+
+export interface SiteFeedback {
+  id: string
+  author_name: string
+  comment: string
+  created_at: string
+  updated_at: string
 }
 
 
