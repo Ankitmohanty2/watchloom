@@ -9,7 +9,12 @@ from app.db.mongodb import get_database
 from app.models.user import UserModel
 from app.repositories.feedback_repository import FeedbackRepository
 from app.repositories.user_repository import UserRepository
-from app.schemas.user import ChangePasswordRequest, UpdatePreferencesRequest, UpdateUserRequest, UserResponse
+from app.schemas.user import (
+    ChangePasswordRequest,
+    UpdatePreferencesRequest,
+    UpdateUserRequest,
+    UserResponse,
+)
 from app.services.password_change_service import PasswordChangeService
 
 router = APIRouter(prefix="/users", tags=["Users"])
