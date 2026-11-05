@@ -26,6 +26,15 @@ export const userService = {
     await api.post('/api/v1/users/me/password/code')
   },
 
+  async requestEmailVerificationCode(): Promise<void> {
+    await api.post('/api/v1/users/me/email/code')
+  },
+
+  async verifyEmail(code: string): Promise<User> {
+    const response = await api.post('/api/v1/users/me/email/verify', { code })
+    return response.data
+  },
+
   async changePassword(data: ChangePasswordInput): Promise<void> {
     await api.put('/api/v1/users/me/password', data)
   },

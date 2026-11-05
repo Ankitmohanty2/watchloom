@@ -8,19 +8,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Brand colors - Dark Netflix-like theme
+        // Watchloom lime accent, shared by both theme modes.
         primary: {
-          DEFAULT: '#FFD93D',
-          50: '#FFFDF5',
-          100: '#FFF9E0',
-          200: '#FFF3C2',
-          300: '#FFECA3',
-          400: '#FFE685',
-          500: '#FFD93D',
-          600: '#F2C20D',
-          700: '#C29A08',
-          800: '#917305',
-          900: '#614D03',
+          DEFAULT: '#B8F34B',
+          50: '#F7FDEB',
+          100: '#EFFBD4',
+          200: '#DFF7AD',
+          300: '#CFF487',
+          400: '#C2F36A',
+          500: '#B8F34B',
+          600: '#95D72A',
+          700: '#6FA819',
+          800: '#4F7A12',
+          900: '#35510D',
         },
         accent: {
           blue: '#0645F5',
@@ -61,8 +61,8 @@ export default {
         '2xl': '2rem',
       },
       boxShadow: {
-        'glow': '0 0 20px rgba(255, 217, 61, 0.3)',
-        'glow-lg': '0 0 40px rgba(255, 217, 61, 0.4)',
+        'glow': '0 0 20px rgba(184, 243, 75, 0.24)',
+        'glow-lg': '0 0 40px rgba(184, 243, 75, 0.32)',
         'blue-glow': '0 0 20px rgba(6, 69, 245, 0.22)',
         'card': '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)',
         'card-hover': '0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3)',

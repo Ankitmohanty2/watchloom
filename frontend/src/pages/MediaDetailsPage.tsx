@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, CalendarDays, Clock3, Plus, Star } from 'lucide-react'
+import { ArrowLeft, CalendarDays, Clock3, Plus, RotateCw, Star } from 'lucide-react'
 import { mediaService } from '@/services/mediaService'
 import { libraryService } from '@/services/libraryService'
 import { useAuthStore } from '@/store/authStore'
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button'
 import { TrailerButton } from '@/components/media/TrailerButton'
 import { TrailerBackdrop } from '@/components/media/TrailerBackdrop'
 import { MediaCard } from '@/components/media/MediaCard'
+import { EpisodeProgressPanel } from '@/components/media/EpisodeProgressPanel'
 import { MediaSynopsis } from '@/components/media/MediaSynopsis'
 import { formatMediaRating } from '@/utils/media'
 
@@ -19,10 +20,15 @@ const MediaDetailsPage = () => {
   const queryClient = useQueryClient()
   const [selectedStatus, setSelectedStatus] = useState('plan_to_watch')
 
-  const { data: media, isLoading, isError } = useQuery({
+  const { data: media, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ['media', id],
     queryFn: () => mediaService.getMediaDetails(id!),
     enabled: !!id,
+    retry: (failureCount, requestError) => {
+      const status = (requestError as { response?: { status?: number } })?.response?.status
+      return failureCount < 3 && (!status || status >= 500)
+    },
+    retryDelay: (attempt) => Math.min(800 * 2 ** attempt, 4_000),
   })
 
   const provider = media?.provider || (media?.media_type === 'anime' ? 'anilist' : 'tmdb')
@@ -50,10 +56,22 @@ const MediaDetailsPage = () => {
       <main className="flex min-h-[60vh] items-center justify-center bg-background px-4 text-center text-foreground">
         <div>
           <h1 className="font-display text-2xl font-semibold">We couldn’t find that title</h1>
-          <p className="mt-2 text-sm text-muted">It may have been removed or the link may be out of date.</p>
-          <Link to="/discover" className="mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold" style={{ backgroundColor: '#FFD93D', color: '#11141b' }}>
-            <ArrowLeft className="h-4 w-4" /> Back to Discover
-          </Link>
+          <p className="mt-2 text-sm text-muted">This title didn’t load. Try again or return to Discover.</p>
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            <button
+              type="button"
+              onClick={() => void refetch()}
+              disabled={isFetching}
+              className="inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-semibold text-[#11150d] transition hover:brightness-95 disabled:opacity-60"
+              style={{ backgroundColor: 'var(--watchloom-primary)' }}
+            >
+              <RotateCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+              {isFetching ? 'Trying again…' : 'Try again'}
+            </button>
+            <Link to="/discover" className="inline-flex h-10 items-center gap-2 rounded-full border border-border/15 px-4 py-2.5 text-sm font-semibold text-foreground-strong transition hover:bg-hover/[0.06]">
+              <ArrowLeft className="h-4 w-4" /> Back to Discover
+            </Link>
+          </div>
         </div>
       </main>
     )
@@ -73,7 +91,7 @@ const MediaDetailsPage = () => {
           mediaType={media.media_type}
           trailerUrl={media.trailer_url}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0d12] via-[#0b0d12]/30 to-[#0b0d12]/20" />
+        <div className="media-detail-hero-overlay absolute inset-0" />
         <div className="container-custom relative flex h-full items-end pb-10">
           <Link to="/discover" className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-black/40 px-3.5 py-2 text-sm font-medium text-white backdrop-blur transition hover:bg-black/60">
             <ArrowLeft className="h-4 w-4" /> Discover
@@ -119,6 +137,14 @@ const MediaDetailsPage = () => {
                 <span className="mt-1 block text-xs leading-5 text-muted">Sign in to keep track of this title.</span>
               </Link>
             )}
+            {media.media_type === 'tv' && (isAuthenticated ? (
+              <EpisodeProgressPanel media={media} />
+            ) : (
+              <Link to="/signin" className="mt-4 block rounded-2xl border border-border/10 bg-surface-alt p-4 transition hover:border-primary-500/35">
+                <span className="block text-sm font-semibold text-foreground-strong">Track episodes</span>
+                <span className="mt-1 block text-xs leading-5 text-muted">Sign in to save a season and episode and continue later.</span>
+              </Link>
+            ))}
           </aside>
 
           <article className="pt-1 md:pt-28">
@@ -129,7 +155,7 @@ const MediaDetailsPage = () => {
             )}
 
             <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-muted">
-              {rating && <span className="inline-flex items-center gap-1.5 font-semibold text-foreground-strong"><Star className="h-4 w-4 fill-[#ffd93d] text-[#ffd93d]" />{rating}</span>}
+              {rating && <span className="inline-flex items-center gap-1.5 font-semibold text-foreground-strong"><Star className="h-4 w-4 fill-primary-500 text-primary-600" />{rating}</span>}
               {media.release_date && <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-4 w-4 text-muted-foreground" />{new Date(media.release_date).getFullYear()}</span>}
               {media.runtime && <span className="inline-flex items-center gap-1.5"><Clock3 className="h-4 w-4 text-muted-foreground" />{media.runtime} min</span>}
               {media.season_count && <span>{media.season_count} {media.season_count === 1 ? 'season' : 'seasons'}</span>}
@@ -150,7 +176,7 @@ const MediaDetailsPage = () => {
                   mediaType={media.media_type}
                   trailerUrl={media.trailer_url}
                   className="inline-flex h-11 items-center gap-2 rounded-lg px-4 text-sm font-semibold transition hover:brightness-105"
-                  style={{ backgroundColor: '#FFD93D', color: '#11141b' }}
+                  style={{ backgroundColor: 'var(--watchloom-primary)', color: 'var(--watchloom-ink)' }}
                 />
               )}
             </div>

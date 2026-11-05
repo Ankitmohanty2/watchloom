@@ -110,7 +110,7 @@ export const MediaCollectionPage = ({
           <div className="rounded-xl border border-border/[0.08] bg-surface px-6 py-14 text-center">
             <h2 className="font-display text-xl font-semibold text-foreground-strong">Nothing to show yet</h2>
             <p className="mt-2 text-sm text-muted">Explore all titles to find something to add to your list.</p>
-            <Link to="/discover" className="mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold" style={{ backgroundColor: '#FFD93D', color: '#11141b' }}>
+            <Link to="/discover" className="mt-5 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-[#11150d]" style={{ backgroundColor: 'var(--watchloom-primary)' }}>
               Go to Discover <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

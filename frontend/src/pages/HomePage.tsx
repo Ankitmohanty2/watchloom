@@ -69,44 +69,44 @@ const HomePage = () => {
 
   return (
     <div className="bg-background text-foreground">
-      <section className="relative isolate min-h-[620px] overflow-hidden bg-background md:min-h-[700px]">
-        <div className="absolute inset-0 overflow-hidden bg-background">
+      <section className="home-hero relative isolate min-h-[620px] overflow-hidden md:min-h-[700px]">
+        <div className="absolute inset-0 overflow-hidden">
           {heroImage && (
             <img
               src={heroImage}
               alt=""
-              className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ${showBackgroundTrailer ? 'opacity-35' : 'opacity-65'}`}
+              className="home-hero-image absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700"
             />
           )}
           {showBackgroundTrailer && trailerVideoId && (
             <YoutubeBackgroundPlayer
               videoId={trailerVideoId}
               onUnavailable={() => setUnavailableTrailerId(trailerVideoId)}
-              className="pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 scale-110 opacity-70"
+              className="home-hero-image home-hero-image--trailer pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 scale-110"
             />
           )}
         </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0b0d12] via-[#0b0d12]/80 to-[#0b0d12]/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0d12] via-transparent to-[#0b0d12]/35" />
+        <div className="home-hero-overlay-left absolute inset-0" />
+        <div className="home-hero-overlay-bottom absolute inset-0" />
 
         <div className="container-custom relative z-10 flex min-h-[620px] items-center py-20 md:min-h-[700px]">
           <div className="max-w-2xl">
-            <div className="mb-5 inline-flex items-center gap-2 border-l-2 border-primary-500 pl-3 text-xs font-semibold uppercase tracking-[0.16em] text-primary-300">
+            <div className="mb-5 inline-flex items-center gap-2 border-l-2 border-primary-600 pl-3 text-xs font-semibold uppercase tracking-[0.16em] text-accent-foreground">
               <span>{featured ? 'Featured title' : 'Welcome to Watchloom'}</span>
             </div>
-            <h1 className="font-display text-5xl font-semibold leading-[1.03] tracking-tight text-white sm:text-6xl lg:text-7xl">
+            <h1 className="font-display text-5xl font-semibold leading-[1.03] tracking-tight text-foreground-strong sm:text-6xl lg:text-7xl">
               {featured?.title || 'Stories worth your time.'}
             </h1>
-            <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-300">
+            <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted">
               {featuredRating && (
                 <span className="inline-flex items-center gap-1.5">
                   <Star className="h-4 w-4 fill-primary-400 text-primary-400" />
-                  <span className="font-semibold text-white">{featuredRating}</span>
+                  <span className="font-semibold text-foreground-strong">{featuredRating}</span>
                 </span>
               )}
               {featured?.release_date && (
                 <span className="inline-flex items-center gap-1.5">
-                  <Clock className="h-4 w-4 text-slate-400" />
+                  <Clock className="h-4 w-4 text-muted-foreground" />
                   {new Date(featured.release_date).getFullYear()}
                 </span>
               )}
@@ -115,9 +115,9 @@ const HomePage = () => {
               )}
             </div>
             {featured?.synopsis ? (
-              <MediaSynopsis synopsis={featured.synopsis} className="mt-5 line-clamp-3 max-w-xl text-base leading-7 text-slate-300 sm:text-lg" />
+              <MediaSynopsis synopsis={featured.synopsis} className="mt-5 line-clamp-3 max-w-xl text-base leading-7 text-muted sm:text-lg" />
             ) : (
-              <p className="mt-5 max-w-xl text-base leading-7 text-slate-300 sm:text-lg">
+              <p className="mt-5 max-w-xl text-base leading-7 text-muted sm:text-lg">
                 Keep the films, series, and anime you love together. Find something new and keep track of every story.
               </p>
             )}
@@ -129,14 +129,14 @@ const HomePage = () => {
                   mediaType={featured.media_type}
                   trailerUrl={featured.trailer_url}
                   onOpen={() => setIsBackgroundTrailerPlaying(false)}
-                  className="inline-flex h-12 items-center gap-2 rounded-lg px-5 text-sm font-semibold transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#fff8e6]"
-                  style={{ backgroundColor: '#FFD93D', color: '#11141b' }}
+                  className="inline-flex h-12 items-center gap-2 rounded-full px-5 text-sm font-semibold text-[#11150d] transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-primary-600"
+                  style={{ backgroundColor: 'var(--watchloom-primary)' }}
                 />
               ) : (
                 <Link
                   to="/discover"
-                  className="inline-flex h-12 items-center gap-2 rounded-lg px-5 text-sm font-semibold"
-                  style={{ backgroundColor: '#FFD93D', color: '#11141b' }}
+                  className="inline-flex h-12 items-center gap-2 rounded-full px-5 text-sm font-semibold text-[#11150d]"
+                  style={{ backgroundColor: 'var(--watchloom-primary)' }}
                 >
                   Browse titles
                   <ArrowRight className="h-4 w-4" />
@@ -144,7 +144,7 @@ const HomePage = () => {
               )}
               <Link
                 to={mediaHref(featured)}
-                className="inline-flex h-12 items-center gap-2 rounded-lg border border-border/20 bg-black/20 px-5 text-sm font-semibold text-white transition-colors hover:border-border/40 hover:bg-hover/[0.08]"
+                className="inline-flex h-12 items-center gap-2 rounded-full border border-border/15 bg-surface/70 px-5 text-sm font-semibold text-foreground-strong backdrop-blur transition-colors hover:bg-surface"
               >
                 Explore title
                 <ArrowUpRight className="h-4 w-4" />
@@ -155,7 +155,7 @@ const HomePage = () => {
                   onClick={() => setIsBackgroundTrailerPlaying((playing) => !playing)}
                   aria-label={isBackgroundTrailerPlaying ? 'Pause background trailer' : 'Play background trailer'}
                   title={isBackgroundTrailerPlaying ? 'Pause background trailer' : 'Play background trailer'}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border/20 bg-black/25 text-white transition-colors hover:border-border/40 hover:bg-hover/[0.1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#fff8e6]"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border/20 bg-surface/70 text-foreground-strong backdrop-blur transition-colors hover:bg-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-primary-600"
                 >
                   {isBackgroundTrailerPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
                 </button>

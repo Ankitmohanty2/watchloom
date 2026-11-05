@@ -36,7 +36,7 @@ const Footer = () => {
             <Link
               to={isAuthenticated ? '/library' : '/signup'}
               className="mt-5 inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-semibold transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-primary-500"
-              style={{ backgroundColor: '#FFD93D', color: '#11141b' }}
+              style={{ backgroundColor: 'var(--watchloom-primary)', color: 'var(--watchloom-ink)' }}
             >
               {isAuthenticated ? 'Open your library' : 'Create your account'}
               <ArrowUpRight className="h-4 w-4" />
@@ -67,6 +67,7 @@ const Footer = () => {
             <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-muted">About Watchloom</h2>
             <ul className="space-y-3">
               <li><Link to="/about" className={footerLinkClass}>About &amp; credits</Link></li>
+              <li><Link to="/privacy" className={footerLinkClass}>Privacy policy</Link></li>
               <li><Link to="/terms" className={footerLinkClass}>Terms &amp; conditions</Link></li>
             </ul>
           </div>
@@ -74,7 +75,23 @@ const Footer = () => {
 
         <div className="flex flex-col gap-2 border-t border-border/10 pt-5 text-xs leading-5 text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Watchloom</p>
-          <p>A home for every story you watch.</p>
+          <div className="flex flex-col gap-1 sm:items-end sm:text-right">
+            <p>A home for every story you watch.</p>
+            <p className="flex flex-wrap items-center gap-x-2">
+              <span>Made by <span className="font-medium text-foreground">Ankit</span></span>
+              <span aria-hidden="true">·</span>
+              <a
+                href="https://ankitmohanty.in"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Ankit’s portfolio, ankitmohanty.in (opens in a new tab)"
+                className="inline-flex items-center gap-1 rounded-sm text-foreground transition-colors hover:text-brand-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary-500"
+              >
+                ankitmohanty.in
+                <ArrowUpRight aria-hidden="true" className="h-3.5 w-3.5" />
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>

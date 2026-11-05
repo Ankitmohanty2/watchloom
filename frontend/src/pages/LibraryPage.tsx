@@ -76,7 +76,7 @@ const LibraryPage = () => {
                     onClick={() => {
                       if (window.confirm('Remove this title from your library?')) deleteMutation.mutate(item.id)
                     }}
-                    className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-lg border border-border/10 bg-background/90 text-white opacity-100 shadow-lg transition hover:border-red-300/40 hover:bg-red-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ffd93d] sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+                    className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full border border-border/10 bg-surface/90 text-foreground-strong opacity-100 shadow-lg transition hover:border-red-300/40 hover:bg-red-950 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-500 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -89,7 +89,7 @@ const LibraryPage = () => {
           <div className="rounded-xl border border-border/[0.08] bg-surface px-6 py-14 text-center">
             <h2 className="font-display text-xl font-semibold text-foreground-strong">Your library is ready for a first title</h2>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted">Save movies, series, and anime here to keep your watchlist organized.</p>
-            <Link to="/discover" className="mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold" style={{ backgroundColor: '#FFD93D', color: '#11141b' }}>
+            <Link to="/discover" className="mt-5 inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-[#11150d]" style={{ backgroundColor: 'var(--watchloom-primary)' }}>
               Explore titles <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

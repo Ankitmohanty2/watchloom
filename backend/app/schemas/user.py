@@ -71,3 +71,9 @@ class ChangePasswordRequest(BaseModel):
         if "password" in info.data and value != info.data["password"]:
             raise ValueError("Passwords do not match")
         return value
+
+
+class VerifyEmailCodeRequest(BaseModel):
+    """Email ownership verification code submission."""
+
+    code: str = Field(..., min_length=6, max_length=6, pattern=r"^\d{6}$")

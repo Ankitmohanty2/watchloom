@@ -14,7 +14,9 @@ from app.schemas.user import (
     UpdatePreferencesRequest,
     UpdateUserRequest,
     UserResponse,
+    VerifyEmailCodeRequest,
 )
+from app.services.email_verification_service import EmailVerificationService
 from app.services.password_change_service import PasswordChangeService
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -105,6 +107,33 @@ async def request_password_change_code(
     service = PasswordChangeService(db)
     await service.request_code(current_user_id, current_user["email"])
     return {"message": "A verification code was sent to your account email."}
+
+
+@router.post("/me/email/code", status_code=status.HTTP_202_ACCEPTED)
+async def request_email_verification_code(
+    current_user: CurrentUser,
+    db=Depends(get_database),
+):
+    """Send a one-time code to the signed-in user's unverified email."""
+    if current_user.get("email_verified"):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This email is already verified.")
+    await EmailVerificationService(db).request_code(current_user["email"])
+    return {"message": "A verification code was sent to your account email."}
+
+
+@router.post("/me/email/verify", response_model=UserResponse)
+async def verify_current_user_email(
+    request: VerifyEmailCodeRequest,
+    current_user: CurrentUser,
+    current_user_id: CurrentUserId,
+    db=Depends(get_database),
+):
+    """Verify the signed-in user's email address with the emailed code."""
+    if current_user.get("email_verified"):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This email is already verified.")
+    return await EmailVerificationService(db).verify_code(
+        current_user_id, current_user["email"], request.code
+    )
 
 
 @router.put("/me/password", status_code=status.HTTP_200_OK)

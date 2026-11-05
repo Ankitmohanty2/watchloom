@@ -28,7 +28,7 @@ const MoviesPage = () => {
             type="button"
             aria-pressed={!isBollywood}
             onClick={() => selectCollection('popular')}
-            className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${!isBollywood ? 'bg-primary-500 text-[#11141b]' : 'text-muted-foreground hover:text-foreground-strong'}`}
+            className={`rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${!isBollywood ? 'bg-primary-500 text-[#11150d]' : 'text-muted-foreground hover:text-foreground-strong'}`}
           >
             All movies
           </button>
@@ -36,7 +36,7 @@ const MoviesPage = () => {
             type="button"
             aria-pressed={isBollywood}
             onClick={() => selectCollection('bollywood')}
-            className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${isBollywood ? 'bg-primary-500 text-[#11141b]' : 'text-muted-foreground hover:text-foreground-strong'}`}
+            className={`rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${isBollywood ? 'bg-primary-500 text-[#11150d]' : 'text-muted-foreground hover:text-foreground-strong'}`}
           >
             Bollywood
           </button>

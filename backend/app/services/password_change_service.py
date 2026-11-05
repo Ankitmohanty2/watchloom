@@ -64,7 +64,7 @@ class PasswordChangeService:
         try:
             await self.email_service.send_password_change_code(email, code)
         except Exception as error:
-            logger.error("Password change email delivery failed (%s)", type(error).__name__)
+            logger.error("Password change email delivery failed: %s", error)
             await self.otp_collection.delete_one({"user_id": object_user_id})
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

@@ -40,9 +40,11 @@ class Settings(BaseSettings):
     smtp_port: int = 587
     smtp_username: str | None = None
     smtp_password: str | None = None
-    smtp_from_email: str | None = None
+    smtp_from_email: str | None = "noreply@ankitmohanty.in"
     smtp_use_ssl: bool = False
     smtp_starttls: bool = True
+    resend_api_key: str | None = None
+    resend_otp_template_id: str | None = None
 
     # CORS
     frontend_url: str = "http://localhost:5173"

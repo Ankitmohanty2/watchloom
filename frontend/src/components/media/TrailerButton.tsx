@@ -58,7 +58,7 @@ export const TrailerButton = ({ provider, providerId, mediaType, trailerUrl, cla
                 type="button"
                 onClick={() => setIsOpen(false)}
                 aria-label="Close trailer"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-hover/[0.08] hover:text-foreground-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ffd93d]"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-hover/[0.08] hover:text-foreground-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-500"
               >
                 <X className="h-5 w-5" />
               </button>

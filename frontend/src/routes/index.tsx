@@ -21,6 +21,7 @@ import StatisticsPage from '@/pages/StatisticsPage'
 import ProfilePage from '@/pages/ProfilePage'
 import SettingsPage from '@/pages/SettingsPage'
 import TermsPage from '@/pages/TermsPage'
+import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage'
 import AboutPage from '@/pages/AboutPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 
@@ -48,6 +49,7 @@ export const AppRouter = () => {
         <Route path="media/fetch" element={<MediaFetchPage />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="terms" element={<TermsPage />} />
+        <Route path="privacy" element={<PrivacyPolicyPage />} />
       </Route>
 
       {/* Auth routes */}

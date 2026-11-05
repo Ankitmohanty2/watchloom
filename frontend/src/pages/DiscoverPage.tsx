@@ -78,10 +78,10 @@ const DiscoverPage = () => {
   const suggestions = (suggestionData?.results ?? []).slice(0, 6) as Media[]
 
   const resultsQuery = activeSearch ? searchResults : trending
-  const responsePages = resultsQuery.data?.pages ?? []
+  const responsePages = resultsQuery.data?.pages
   const items: Media[] = useMemo(() => {
     const seen = new Set<string>()
-    return responsePages.flatMap((page) => page.results).filter((media) => {
+    return (responsePages ?? []).flatMap((page) => page.results).filter((media) => {
       const key = `${media.provider}:${media.provider_id}`
       if (seen.has(key)) return false
       seen.add(key)
@@ -97,7 +97,7 @@ const DiscoverPage = () => {
 
   return (
     <div className="relative isolate bg-background text-foreground">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_top,_rgba(255,217,61,0.07),_transparent_62%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_top,_rgba(184,243,75,0.14),_transparent_62%)]" />
       <main className="container-custom relative pb-20 pt-10 sm:pt-14">
         <div className="mb-8 flex flex-col gap-7 md:mb-10 md:flex-row md:items-end md:justify-between">
           <div>
@@ -157,7 +157,7 @@ const DiscoverPage = () => {
             )}
             <button
               type="submit"
-              className="absolute right-1.5 top-1/2 h-9 -translate-y-1/2 rounded-lg px-4 text-sm font-semibold transition-colors hover:brightness-105 sm:right-2 sm:h-10" style={{ backgroundColor: '#FFD93D', color: '#11141b' }}
+              className="absolute right-1.5 top-1/2 h-9 -translate-y-1/2 rounded-full px-4 text-sm font-semibold text-[#11150d] transition-colors hover:brightness-95 sm:right-2 sm:h-10" style={{ backgroundColor: 'var(--watchloom-primary)' }}
             >
               Search
             </button>
@@ -268,42 +268,41 @@ const DiscoverPage = () => {
           </div>
         ) : featured ? (
           <>
-            <section aria-label="Featured title" className="group relative mb-10 min-h-[340px] overflow-hidden rounded-2xl border border-border/[0.08] bg-surface-hover sm:min-h-[390px]">
+            <section aria-label="Featured title" className="discover-featured group relative mb-10 min-h-[340px] overflow-hidden rounded-[1.75rem] border border-border/[0.08] bg-surface-hover sm:min-h-[390px]">
               {featured.backdrop_path || featured.poster_path ? (
                 <img
                   src={featured.backdrop_path || featured.poster_path}
                   alt=""
-                  className="absolute inset-0 h-full w-full object-cover object-center opacity-75 transition-transform duration-700 group-hover:scale-[1.015]"
+                  className="discover-featured-image absolute inset-0 h-full w-full object-cover object-center opacity-65 transition-transform duration-700 group-hover:scale-[1.015]"
                 />
               ) : null}
-              <div className="absolute inset-0 bg-gradient-to-r from-[#0b0d12] via-[#0b0d12]/85 to-[#0b0d12]/15" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0b0d12]/80 via-transparent to-[#0b0d12]/10" />
+              <div className="discover-featured-overlay absolute inset-0" />
               <div className="relative flex min-h-[340px] max-w-2xl flex-col justify-end p-6 sm:min-h-[390px] sm:p-9 lg:p-11">
                 <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-primary-500/25 bg-background/65 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-300 backdrop-blur">
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary-400" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary-600" />
                   {activeSearch ? 'Search match' : 'Trending right now'}
                 </div>
-                <h2 className="max-w-xl font-display text-3xl font-semibold leading-[1.05] tracking-tight text-white sm:text-4xl lg:text-5xl">
+                <h2 className="max-w-xl font-display text-3xl font-semibold leading-[1.05] tracking-tight text-foreground-strong sm:text-4xl lg:text-5xl">
                   {featured.title}
                 </h2>
-                <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-slate-300">
+                <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted">
                   {featured.release_date && <span>{new Date(featured.release_date).getFullYear()}</span>}
                   {featured.release_date && <span className="h-1 w-1 rounded-full bg-slate-500" />}
                   <span className="capitalize">{featured.media_type === 'tv' ? 'Series' : featured.media_type}</span>
                   {featuredRating && (
-                    <span className="inline-flex items-center gap-1.5 border-l border-border/20 pl-3 text-white">
+                    <span className="inline-flex items-center gap-1.5 border-l border-border/20 pl-3 text-foreground-strong">
                       <Star className="h-3.5 w-3.5 fill-primary-400 text-primary-400" />
                       {featuredRating}
                     </span>
                   )}
                 </div>
                 {featured.synopsis && (
-                  <MediaSynopsis synopsis={featured.synopsis} className="mt-4 line-clamp-3 max-w-lg text-sm leading-6 text-slate-300/90 sm:text-[15px]" />
+                  <MediaSynopsis synopsis={featured.synopsis} className="mt-4 line-clamp-3 max-w-lg text-sm leading-6 text-muted sm:text-[15px]" />
                 )}
                 {featured.genres?.length > 0 && (
                   <div className="mt-4 flex flex-wrap gap-2">
                     {featured.genres.slice(0, 3).map((genre) => (
-                      <span key={genre} className="rounded-full border border-border/15 bg-hover/[0.06] px-2.5 py-1 text-[11px] text-slate-200">
+                      <span key={genre} className="rounded-full border border-border/15 bg-surface/65 px-2.5 py-1 text-[11px] text-foreground backdrop-blur">
                         {genre}
                       </span>
                     ))}
@@ -311,7 +310,7 @@ const DiscoverPage = () => {
                 )}
                 <Link
                   to={getMediaLink(featured)}
-                  className="mt-6 inline-flex w-fit items-center gap-2 rounded-lg bg-primary-500 px-4 py-2.5 text-sm font-semibold text-[#11141b] transition hover:bg-primary-300"
+                  className="mt-6 inline-flex w-fit items-center gap-2 rounded-full bg-primary-500 px-4 py-2.5 text-sm font-semibold text-[#11150d] transition hover:bg-primary-400"
                 >
                   Explore title
                   <ArrowUpRight className="h-4 w-4" />

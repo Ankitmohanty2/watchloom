@@ -28,7 +28,7 @@ const SettingsPage = () => {
             <div className="mt-6 grid gap-3 border-t border-border/[0.08] pt-5 sm:grid-cols-2">
               <button type="button" aria-pressed={theme === 'light'} onClick={() => setTheme('light')} data-theme-preview="light" className={`theme-preview-light w-full rounded-xl border p-4 text-left transition-colors ${theme === 'light' ? 'border-primary-500/60 ring-2 ring-primary-500/15' : 'border-border/[0.08] hover:border-primary-500/40'}`}>
                 <div className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-[#1f2937] shadow-sm"><Sun className="h-4 w-4" /></span>
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-500/15 text-brand-muted shadow-sm"><Sun className="h-4 w-4" /></span>
                   <div>
                     <p className="text-sm font-semibold text-foreground-strong">Light</p>
                     <p className="mt-0.5 text-xs text-muted">Bright, crisp surfaces</p>

@@ -22,8 +22,8 @@ export const ThemeToggle = ({ showLabels = false, compact = false, className }: 
         title={`${theme === 'light' ? 'Light' : 'Dark'} mode · click to switch to ${nextTheme}`}
         onClick={toggleTheme}
         className={cn(
-          'inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/15 bg-surface-alt text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500',
-          theme === 'light' && 'text-brand-muted',
+          'inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/15 bg-surface text-muted-foreground transition-colors hover:bg-surface-alt hover:text-foreground-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500',
+          theme === 'light' && 'bg-primary-500/15 text-brand-muted',
           className
         )}
       >
@@ -55,7 +55,7 @@ export const ThemeToggle = ({ showLabels = false, compact = false, className }: 
             className={cn(
               'inline-flex h-8 items-center justify-center gap-2 rounded-lg px-2.5 text-sm transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500',
               active
-                ? 'bg-primary-500 text-[#11141b] shadow-sm ring-1 ring-primary-600/20'
+                ? 'bg-primary-500 text-[#11150d] shadow-sm ring-1 ring-primary-600/20'
                 : 'text-muted-foreground hover:bg-hover/[0.06] hover:text-foreground-strong',
               !showLabels && 'w-8 px-0'
             )}

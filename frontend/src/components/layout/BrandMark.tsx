@@ -20,7 +20,7 @@ export const BrandMark = ({ size = 'regular', showName = true, className }: Bran
       className={cn('inline-flex min-w-0 shrink-0 items-center gap-2.5 rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary-500', className)}
     >
       {logoFailed ? (
-        <span className={cn('inline-flex shrink-0 items-center justify-center rounded-xl bg-primary-500 text-[#11141b]', logoSize)}>
+        <span className={cn('inline-flex shrink-0 items-center justify-center rounded-xl bg-primary-500 text-[#11150d]', logoSize)}>
           <Clapperboard className="h-5 w-5" aria-hidden="true" />
         </span>
       ) : (

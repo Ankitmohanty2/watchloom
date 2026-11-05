@@ -193,7 +193,7 @@ export const CommunityFeedbackSection = () => {
           </div>
         ) : visibleComments.length ? visibleComments.map((item) => (
           <article key={item.id} className="animate-fade-in flex min-h-[245px] flex-col rounded-2xl border border-border/[0.08] bg-surface p-6 shadow-sm transition-colors hover:border-border/20 sm:p-7">
-            <Quote className="mb-5 h-6 w-6 fill-[#ffd93d]/15 text-brand-muted" strokeWidth={1.8} aria-hidden="true" />
+            <Quote className="mb-5 h-6 w-6 fill-primary-500/15 text-brand-muted" strokeWidth={1.8} aria-hidden="true" />
             <blockquote className="flex-1 text-[15px] leading-7 text-foreground-strong sm:text-base">“{item.comment}”</blockquote>
             <div className="mt-7 flex items-center gap-3 border-t border-border/[0.08] pt-5">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-500/15 text-xs font-semibold text-brand-muted">
@@ -268,7 +268,7 @@ export const CommunityFeedbackSection = () => {
             </div>
 
             <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-xl border border-border/10 bg-surface-alt px-3.5 py-3 text-xs leading-5 text-muted">
-              <input type="checkbox" checked={publicConsent} onChange={(event) => setPublicConsent(event.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#ffd93d]" />
+              <input type="checkbox" checked={publicConsent} onChange={(event) => setPublicConsent(event.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-primary-600" />
               <span>I agree that my comment and display name ({user?.display_name || 'my name'}) may appear publicly in the Watchloom carousel.</span>
             </label>
             <p className="mt-2 text-xs leading-5 text-muted-foreground">Your comment is visible to visitors. You can edit or remove it later.</p>

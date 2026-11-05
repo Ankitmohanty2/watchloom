@@ -13,31 +13,31 @@ const LEGACY_STORAGE_KEY = 'theme-storage'
 
 const themeTokens: Record<Theme, Record<string, string>> = {
   dark: {
-    '--background-rgb': '11 13 18',
-    '--foreground-rgb': '247 242 223',
-    '--foreground-strong-rgb': '255 248 230',
-    '--surface-rgb': '17 20 27',
-    '--surface-alt-rgb': '13 19 34',
-    '--surface-hover-rgb': '23 26 34',
-    '--muted-rgb': '170 183 210',
-    '--muted-foreground-rgb': '142 155 181',
-    '--accent-foreground-rgb': '225 201 94',
-    '--brand-muted-rgb': '201 184 102',
-    '--border-rgb': '255 255 255',
+    '--background-rgb': '17 19 16',
+    '--foreground-rgb': '229 235 220',
+    '--foreground-strong-rgb': '250 251 246',
+    '--surface-rgb': '25 28 23',
+    '--surface-alt-rgb': '31 36 28',
+    '--surface-hover-rgb': '43 49 37',
+    '--muted-rgb': '180 189 171',
+    '--muted-foreground-rgb': '142 151 136',
+    '--accent-foreground-rgb': '184 243 75',
+    '--brand-muted-rgb': '184 243 75',
+    '--border-rgb': '232 240 223',
     '--hover-rgb': '255 255 255',
   },
   light: {
-    '--background-rgb': '246 247 249',
-    '--foreground-rgb': '53 61 74',
-    '--foreground-strong-rgb': '22 29 40',
+    '--background-rgb': '248 249 246',
+    '--foreground-rgb': '43 48 38',
+    '--foreground-strong-rgb': '18 21 16',
     '--surface-rgb': '255 255 255',
-    '--surface-alt-rgb': '239 242 246',
-    '--surface-hover-rgb': '229 233 239',
-    '--muted-rgb': '82 92 108',
-    '--muted-foreground-rgb': '106 116 131',
-    '--accent-foreground-rgb': '126 91 0',
-    '--brand-muted-rgb': '126 91 0',
-    '--border-rgb': '43 52 66',
+    '--surface-alt-rgb': '240 243 235',
+    '--surface-hover-rgb': '231 238 221',
+    '--muted-rgb': '79 87 71',
+    '--muted-foreground-rgb': '109 117 102',
+    '--accent-foreground-rgb': '66 105 20',
+    '--brand-muted-rgb': '71 112 22',
+    '--border-rgb': '35 44 25',
     '--hover-rgb': '25 34 48',
   },
 }
@@ -45,7 +45,7 @@ const themeTokens: Record<Theme, Record<string, string>> = {
 const isTheme = (value: unknown): value is Theme => value === 'light' || value === 'dark'
 
 const readSavedTheme = (): Theme => {
-  if (typeof window === 'undefined') return 'dark'
+  if (typeof window === 'undefined') return 'light'
 
   try {
     const savedTheme = window.localStorage.getItem(STORAGE_KEY)
@@ -61,7 +61,7 @@ const readSavedTheme = (): Theme => {
     // Keep the app usable when browser storage is unavailable.
   }
 
-  return 'dark'
+  return 'light'
 }
 
 const applyTheme = (theme: Theme) => {

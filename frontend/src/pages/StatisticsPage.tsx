@@ -20,7 +20,7 @@ const StatisticsPage = () => {
           <p className="mt-2 text-sm text-muted">Add a few titles to your library, then come back here.</p>
           <div className="mt-5 flex justify-center gap-3">
             <button onClick={() => refetch()} className="rounded-lg border border-border/15 px-4 py-2 text-sm font-medium hover:bg-hover/[0.06]">Retry</button>
-            <Link to="/discover" className="rounded-lg px-4 py-2 text-sm font-semibold" style={{ backgroundColor: '#FFD93D', color: '#11141b' }}>Discover</Link>
+            <Link to="/discover" className="rounded-full px-4 py-2 text-sm font-semibold text-[#11150d]" style={{ backgroundColor: 'var(--watchloom-primary)' }}>Discover</Link>
           </div>
         </div>
       </main>

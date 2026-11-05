@@ -78,6 +78,13 @@ export interface EpisodeProgress {
   updated_at: string
 }
 
+export interface MediaProgress {
+  media_id: string
+  total_episodes_watched: number
+  episodes: EpisodeProgress[]
+  progress_percentage?: number | null
+}
+
 export interface ContinueWatchingItem {
   media: Media
   last_watched_episode: {

@@ -1,10 +1,10 @@
 import api from './api'
-import type { ContinueWatchingItem, EpisodeProgress } from '@/types'
+import type { ContinueWatchingItem, EpisodeProgress, MediaProgress } from '@/types'
 
 export const progressService = {
-  async getMediaProgress(mediaId: string) {
+  async getMediaProgress(mediaId: string): Promise<MediaProgress> {
     const response = await api.get(`/api/v1/progress/${mediaId}`)
-    return response.data
+    return response.data as MediaProgress
   },
 
   async markEpisodeWatched(

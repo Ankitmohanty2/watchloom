@@ -32,6 +32,11 @@ const ProfilePage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [passwordError, setPasswordError] = useState('')
   const [passwordMessage, setPasswordMessage] = useState('')
+  const [emailCode, setEmailCode] = useState('')
+  const [emailCodeSent, setEmailCodeSent] = useState(false)
+  const [emailResendIn, setEmailResendIn] = useState(0)
+  const [emailError, setEmailError] = useState('')
+  const [emailMessage, setEmailMessage] = useState('')
 
   const uploadAvatar = useMutation({
     mutationFn: userService.uploadAvatar,
@@ -79,11 +84,48 @@ const ProfilePage = () => {
     onError: (error) => setPasswordError(apiErrorMessage(error, 'We couldn’t change your password. Check the code and try again.')),
   })
 
+  const requestEmailCode = useMutation({
+    mutationFn: userService.requestEmailVerificationCode,
+    onSuccess: () => {
+      setEmailCodeSent(true)
+      setEmailResendIn(60)
+      setEmailCode('')
+      setEmailError('')
+      setEmailMessage(`A 6-digit verification code is on its way to ${maskEmail(user?.email ?? '')}.`)
+    },
+    onError: (error) => {
+      setEmailError(apiErrorMessage(error, 'We couldn’t send a verification code. Please try again.'))
+      setEmailMessage('')
+    },
+  })
+
+  const verifyEmail = useMutation({
+    mutationFn: userService.verifyEmail,
+    onSuccess: (updatedUser) => {
+      setUser(updatedUser)
+      setEmailCodeSent(false)
+      setEmailResendIn(0)
+      setEmailCode('')
+      setEmailError('')
+      setEmailMessage('Your email address is verified.')
+    },
+    onError: (error) => {
+      setEmailError(apiErrorMessage(error, 'That code could not be verified. Check it and try again.'))
+      setEmailMessage('')
+    },
+  })
+
   useEffect(() => {
     if (resendIn <= 0) return
     const timeout = window.setTimeout(() => setResendIn((seconds) => seconds - 1), 1000)
     return () => window.clearTimeout(timeout)
   }, [resendIn])
+
+  useEffect(() => {
+    if (emailResendIn <= 0) return
+    const timeout = window.setTimeout(() => setEmailResendIn((seconds) => seconds - 1), 1000)
+    return () => window.clearTimeout(timeout)
+  }, [emailResendIn])
 
   if (!user) return null
 
@@ -161,9 +203,24 @@ const ProfilePage = () => {
               {avatarError && <p role="alert" className="mt-2 text-xs text-rose-500">{avatarError}</p>}
               {avatarMessage && <p role="status" className="mt-2 flex items-center gap-1.5 text-xs text-emerald-600"><Check className="h-3.5 w-3.5" />{avatarMessage}</p>}
             </div>
-            <span className={`inline-flex w-fit items-center rounded-full border px-3 py-1 text-xs font-medium ${user.email_verified ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200' : 'border-[#ffd93d]/20 bg-[#ffd93d]/10 text-brand-muted'}`}>
-              {user.email_verified ? 'Email verified' : 'Email not verified'}
-            </span>
+            {user.email_verified ? (
+              <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-200">
+                <Check className="h-3.5 w-3.5" /> Email verified
+              </span>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center rounded-full border border-primary-600/20 bg-primary-500/10 px-3 py-1.5 text-xs font-medium text-brand-muted">Email not verified</span>
+                <button
+                  type="button"
+                  onClick={() => { setEmailError(''); setEmailMessage(''); requestEmailCode.mutate() }}
+                  disabled={requestEmailCode.isPending || emailResendIn > 0}
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-primary-500 px-3.5 text-xs font-semibold text-[#11150d] transition hover:bg-primary-400 disabled:cursor-wait disabled:opacity-60"
+                >
+                  <Mail className="h-3.5 w-3.5" />
+                  {requestEmailCode.isPending ? 'Sending…' : emailResendIn > 0 ? `Resend in ${emailResendIn}s` : 'Verify email'}
+                </button>
+              </div>
+            )}
           </div>
 
           <dl className="grid gap-0 sm:grid-cols-2">
@@ -185,6 +242,45 @@ const ProfilePage = () => {
             </div>
           </dl>
         </section>
+
+        {!user.email_verified && (emailCodeSent || emailError || emailMessage) && (
+          <section className="mt-5 rounded-2xl border border-border/10 bg-surface p-5 sm:p-6" aria-labelledby="verify-email-title">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-muted">Account security</p>
+                <h2 id="verify-email-title" className="mt-1 font-display text-lg font-semibold text-foreground-strong">Verify your email</h2>
+                <p className="mt-1 text-sm leading-6 text-muted">Enter the one-time code sent to {maskEmail(user.email)}. It expires after 10 minutes.</p>
+              </div>
+              {emailCodeSent && (
+                <button type="button" onClick={() => setEmailCodeSent(false)} className="shrink-0 rounded-full px-3 py-1.5 text-xs font-medium text-muted transition hover:bg-surface-alt hover:text-foreground-strong">Close</button>
+              )}
+            </div>
+            {emailCodeSent && (
+              <form onSubmit={(event) => { event.preventDefault(); setEmailError(''); verifyEmail.mutate(emailCode) }} className="mt-4 flex flex-col gap-3 border-t border-border/10 pt-4 sm:flex-row sm:items-end">
+                <label className="min-w-0 flex-1 text-xs font-medium text-muted sm:max-w-xs">6-digit code
+                  <input
+                    value={emailCode}
+                    onChange={(event) => setEmailCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    placeholder="000000"
+                    className="mt-1.5 block h-11 w-full rounded-xl border border-border/15 bg-background px-3.5 text-sm font-normal tracking-[0.2em] text-foreground outline-none placeholder:tracking-normal placeholder:text-muted-foreground focus:border-primary-500/60 focus:ring-4 focus:ring-primary-500/10"
+                  />
+                </label>
+                <button type="submit" disabled={verifyEmail.isPending || emailCode.length !== 6} className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-primary-500 px-4 text-sm font-semibold text-[#11150d] transition hover:bg-primary-400 disabled:cursor-not-allowed disabled:opacity-50">
+                  <Check className="h-4 w-4" /> {verifyEmail.isPending ? 'Verifying…' : 'Verify address'}
+                </button>
+                <button type="button" onClick={() => requestEmailCode.mutate()} disabled={requestEmailCode.isPending || emailResendIn > 0} className="inline-flex h-11 shrink-0 items-center justify-center rounded-full px-3 text-sm font-medium text-muted transition hover:text-foreground-strong disabled:opacity-50">
+                  {requestEmailCode.isPending ? 'Sending…' : emailResendIn > 0 ? `Resend in ${emailResendIn}s` : 'Send a new code'}
+                </button>
+              </form>
+            )}
+            {emailError && <p role="alert" className="mt-4 rounded-xl border border-rose-500/20 bg-rose-500/[0.06] px-3.5 py-3 text-sm text-rose-500">{emailError}</p>}
+            {emailMessage && <p role="status" className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] px-3.5 py-3 text-sm text-emerald-700 dark:text-emerald-200"><Check className="h-4 w-4 shrink-0" />{emailMessage}</p>}
+          </section>
+        )}
 
         <section className="mt-5 rounded-2xl border border-border/[0.08] bg-surface p-5 sm:p-7" aria-labelledby="password-title">
           <div className="flex items-start gap-3">
@@ -242,7 +338,7 @@ const ProfilePage = () => {
 
         <div className="mt-5 flex flex-wrap gap-3">
           <Link to="/settings" className="rounded-full border border-border/15 px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-hover/[0.05]">Settings</Link>
-          <Link to="/library" className="rounded-full px-4 py-2.5 text-sm font-semibold" style={{ backgroundColor: '#FFD93D', color: '#11141b' }}>Open library</Link>
+          <Link to="/library" className="rounded-full px-4 py-2.5 text-sm font-semibold text-[#11150d]" style={{ backgroundColor: 'var(--watchloom-primary)' }}>Open library</Link>
         </div>
       </div>
     </main>
