@@ -1,399 +1,154 @@
-# Universal Entertainment Tracker
+# Watchloom
 
-A full-stack web application for discovering, tracking, and managing anime, movies, TV shows, and web series from around the world.
+**A home for every story you watch.**
 
-## Features
+Watchloom brings movies, TV series, and anime together in one place. Discover something new, save it to your library, and keep track of your progress.
 
-- 🔍 **Universal Search** - Find anime, movies, and TV shows in one place
-- 📚 **Personal Library** - Track your watchlist with statuses (watching, completed, plan to watch, etc.)
-- 📊 **Episode Tracking** - Mark individual episodes as watched
-- 📈 **Statistics** - View your viewing history and statistics
-- ⭐ **Ratings & Notes** - Rate content and add personal notes
-- 🎨 **Clean Design** - Minimalist, accessible interface
-- 🔐 **Secure Authentication** - JWT-based auth with refresh tokens
-- 🖼️ **Profile Photos** - Upload and manage a personal account avatar
-- ✉️ **Email OTP Password Changes** - Verify password changes with a short-lived email code
-- 🌙 **Dark Mode** - Toggle between light and dark themes
+[Open Watchloom](https://watchloom.ankitmohanty.in)
 
-## Technology Stack
+## Screenshots
 
-### Frontend
-- React 18 with TypeScript
-- Vite for fast development
-- Tailwind CSS for styling
-- TanStack Query for data fetching
-- Zustand for state management
+<p align="center">
+  <img src="screenshot/home.png" alt="Watchloom home page featuring a title carousel and recommendations" width="100%" />
+</p>
 
-### Backend
-- Python 3.12+ with FastAPI
-- MongoDB for data persistence
-- TMDB & AniList API integration
-- JWT authentication
-- Argon2 password hashing
+<p align="center">
+  <img src="screenshot/library.png" alt="Watchloom personal library" width="49%" />
+  <img src="screenshot/title-details.png" alt="Watchloom title details page" width="49%" />
+</p>
 
-## Quick Start
+## What you can do
 
-### Prerequisites
+- Browse and search movies, series, and anime, including titles from around the world.
+- Explore featured titles, popular collections, genres, and recommendations.
+- Watch available trailers and open a title page for its overview and details.
+- Save titles to a personal library with statuses such as Plan to Watch, Watching, Completed, On Hold, and Dropped.
+- Track season and episode progress for series.
+- Add personal ratings and notes, and review viewing statistics.
+- Customize your profile photo and switch between light and dark themes.
+- Share a public comment on the home page after signing in.
 
-- Python 3.12+
-- Node.js 18+
-- MongoDB (or Docker)
-- TMDB API key ([Get one free here](https://www.themoviedb.org/settings/api))
+## Built with
 
-### Option 1: Using Docker (Recommended)
+| Area | Technologies |
+| --- | --- |
+| Frontend | React 18, TypeScript, Vite, Tailwind CSS |
+| Data fetching and state | TanStack Query, Zustand |
+| Backend | Python 3.12+, FastAPI, Pydantic |
+| Database | MongoDB |
+| Media data | TMDB for movies and series; AniList for anime |
+| Authentication | JWT tokens and Argon2 password hashing |
 
-```bash
-# Start everything
-docker-compose up --build -d
+## Run locally
 
-# Wait 30-60 seconds, then open http://localhost:5173
-```
+### Requirements
 
-### Option 2: Manual Setup
+- Python 3.12 or newer
+- Node.js 18 or newer
+- MongoDB, local or hosted
+- A TMDB API key for movie and series data
 
-#### 1. Start MongoDB
+### 1. Configure the backend
 
-Using Docker:
-```bash
-docker run -d --name mongodb -p 27017:27017 mongo:7.0
-```
+In a terminal, from the project root:
 
-Or install MongoDB locally from: https://www.mongodb.com/try/download/community
-
-#### 2. Setup Backend
-
-```bash
+```powershell
 cd backend
-
-# Create virtual environment
-python -m venv venv
-
-# Activate virtual environment
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
-
-# Install dependencies
+py -m venv .venv
+.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+Copy-Item .env.example .env
+```
 
-# Copy environment file
-cp .env.example .env
+On macOS or Linux, activate the environment with `source .venv/bin/activate` and copy the configuration with `cp .env.example .env`.
 
-# Edit .env and add your TMDB_API_KEY and generate JWT secrets
-# Use any random string for JWT secrets (at least 32 characters)
+Edit `backend/.env` and set at least `MONGODB_URI`, `TMDB_API_KEY`, `JWT_SECRET_KEY`, and `REFRESH_TOKEN_SECRET`. Use private, randomly generated values for both token secrets. The example file contains the other local development settings.
 
-# Run backend
+Start the API from the `backend` directory:
+
+```bash
 python -m uvicorn app.main:app --reload
 ```
 
-Backend will run on: http://localhost:8000  
-API docs: http://localhost:8000/docs
+The API runs at `http://localhost:8000`. Interactive API documentation is available at `http://localhost:8000/docs`.
 
-#### 3. Setup Frontend
+### 2. Configure the frontend
 
-Open a new terminal:
+Open a second terminal from the project root:
 
-```bash
+```powershell
 cd frontend
-
-# Install dependencies
 npm install
-
-# Copy environment file
-cp .env.example .env
-
-# Run frontend
+Copy-Item .env.example .env
 npm run dev
 ```
 
-Frontend will run on: http://localhost:5173
+On macOS or Linux, use `cp .env.example .env` in place of `Copy-Item`. The default `VITE_API_BASE_URL` points to the local backend at `http://localhost:8000`.
 
-### Access the Application
+Open `http://localhost:5173` in your browser.
 
-Open your browser and go to: **http://localhost:5173**
+### Optional email delivery
 
-## Configuration
+Password-change verification codes need a configured email provider. The backend example is set up for Resend SMTP. Set `SMTP_PASSWORD` to your Resend API key and use a sender address on a domain verified with Resend. If using the shared Resend template, set `RESEND_API_KEY` and `RESEND_OTP_TEMPLATE_ID` as required by your deployment configuration. Keep provider credentials in backend environment variables; never put them in the frontend or commit them to the repository.
 
-### Backend Environment Variables
+## Docker
 
-Edit `backend/.env`:
-
-```env
-# MongoDB
-MONGODB_URI=mongodb://localhost:27017/
-DATABASE_NAME=entertainment_tracker
-
-# JWT Secrets (generate random strings)
-JWT_SECRET_KEY=your-super-secret-jwt-key-change-this
-REFRESH_TOKEN_SECRET=your-super-secret-refresh-token-key-change-this
-
-# TMDB API Key
-TMDB_API_KEY=your-tmdb-api-key-here
-
-# Other settings
-FRONTEND_URL=http://localhost:5173
-ENVIRONMENT=development
-
-# Outbound SMTP (required to deliver password-change codes)
-SMTP_HOST=smtp.resend.com
-SMTP_PORT=587
-SMTP_USERNAME=resend
-SMTP_PASSWORD=your-resend-api-key
-SMTP_FROM_EMAIL=notifications@your-verified-domain.com
-SMTP_USE_SSL=false
-SMTP_STARTTLS=true
-```
-
-For production, add the SMTP values to the **backend service** environment in Render. Resend requires a verified sending domain; use its API key as the SMTP password and a sender address on that verified domain. Keep the key private and out of frontend variables and source control. The password-change code expires after 10 minutes; the server limits resends and failed attempts.
-
-### Frontend Environment Variables
-
-Edit `frontend/.env`:
-
-```env
-VITE_API_BASE_URL=http://localhost:8000
-```
-
-## API Documentation
-
-Once the backend is running, visit:
-- **Swagger UI:** http://localhost:8000/docs
-- **ReDoc:** http://localhost:8000/redoc
-
-## Development
-
-### Backend Commands
+Create `backend/.env` from `backend/.env.example` and configure the required values, then run from the project root:
 
 ```bash
-# Run with auto-reload
-uvicorn app.main:app --reload
-
-# Run tests
-pytest
-
-# Run tests with coverage
-pytest --cov=app
-
-# Lint and format
-ruff check .
-ruff format .
+docker compose up --build
 ```
 
-### Frontend Commands
+The application is available at `http://localhost:5173`, and the API at `http://localhost:8000`. Stop the services with `Ctrl+C`, or run `docker compose down` in another terminal.
+
+## Useful commands
+
+### Frontend
+
+Run these commands from `frontend/`:
 
 ```bash
-# Start dev server
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
-
-# Type check
-npm run type-check
-
-# Lint
-npm run lint
+npm run dev          # Start the development server
+npm run type-check   # Check TypeScript types
+npm run lint         # Run ESLint
+npm run build        # Create a production build
+npm run preview      # Preview the production build
 ```
 
-## Docker Commands
+### Backend
+
+Run these commands from `backend/` with the virtual environment activated:
 
 ```bash
-# Start all services
-docker-compose up -d
-
-# Start with build
-docker-compose up --build -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
-
-# Stop and remove volumes (deletes data)
-docker-compose down -v
-
-# Restart services
-docker-compose restart
+pytest               # Run backend tests
+ruff check .         # Lint Python code
+ruff format .        # Format Python code
 ```
 
-## Project Structure
+## Project layout
 
+```text
+backend/
+  app/
+    api/              API routes
+    core/             Configuration and security
+    db/               MongoDB connection
+    integrations/     TMDB and AniList clients
+    models/           Database models
+    repositories/     Data access
+    schemas/          API request and response schemas
+    services/         Application logic
+  tests/
+frontend/
+  src/
+    components/       Shared interface components
+    pages/            Application pages
+    services/         API clients
+    store/            Client state
+    types/            TypeScript types
+screenshot/           Product screenshots used in this README
 ```
-.
-├── backend/                # FastAPI backend
-│   ├── app/
-│   │   ├── api/           # API routes
-│   │   ├── core/          # Core configuration
-│   │   ├── db/            # Database setup
-│   │   ├── models/        # Data models
-│   │   ├── schemas/       # Pydantic schemas
-│   │   ├── services/      # Business logic
-│   │   ├── repositories/  # Data access layer
-│   │   └── integrations/  # External APIs (TMDB, AniList)
-│   ├── tests/             # Backend tests
-│   └── requirements.txt
-├── frontend/              # React frontend
-│   ├── src/
-│   │   ├── components/   # React components
-│   │   ├── pages/        # Page components
-│   │   ├── services/     # API services
-│   │   ├── store/        # State management
-│   │   ├── types/        # TypeScript types
-│   │   └── utils/        # Utility functions
-│   └── package.json
-└── docker-compose.yml
-```
-
-## Features in Detail
-
-### Authentication
-- User registration with email verification
-- Secure login/logout
-- JWT access tokens with refresh token rotation
-- Password reset functionality
-
-### Media Discovery
-- Search across movies, TV shows, and anime
-- Filter by genre, year, rating
-- View trending and popular content
-- Get detailed information and recommendations
-
-### Library Management
-- Add titles to your personal library
-- Set status: Plan to Watch, Watching, Completed, On Hold, Dropped
-- Rate titles and add personal notes
-- Track when you started/completed titles
-
-### Episode Tracking
-- Mark individual episodes as watched
-- Track progress across seasons
-- View watch history
-- Resume watching from last position
-
-### Statistics Dashboard
-- Total titles tracked
-- Completed counts by media type
-- Episodes watched
-- Hours watched (estimated)
-- Favorite genres
-- Recently completed titles
-
-## Testing
-
-### Backend Tests
-
-```bash
-cd backend
-pytest
-```
-
-Tests cover:
-- Authentication flows
-- Authorization checks
-- Library management
-- Episode tracking
-- Statistics calculation
-
-### Frontend Tests
-
-```bash
-cd frontend
-npm run test
-```
-
-## Deployment
-
-### Backend Deployment
-
-1. Set production environment variables
-2. Set `ENVIRONMENT=production`
-3. Set `COOKIE_SECURE=true` for HTTPS
-4. Use MongoDB Atlas for database
-5. Deploy to platform of choice (Railway, Render, AWS, etc.)
-
-### Frontend Deployment
-
-1. Build: `npm run build`
-2. Deploy `dist` folder to static hosting (Vercel, Netlify, etc.)
-3. Configure production API URL
-
-### Docker Production
-
-```bash
-docker-compose -f docker-compose.prod.yml up -d
-```
-
-## Security
-
-- All passwords hashed with Argon2
-- JWT tokens with short expiration
-- HTTP-only secure cookies
-- Rate limiting on auth endpoints
-- Input validation with Pydantic
-- CORS configuration
-- Environment-based secrets
-
-## API Rate Limits
-
-- Respects TMDB API rate limits
-- Respects AniList API rate limits
-- Authentication endpoints are rate-limited
-- Caching implemented to reduce API calls
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
-
-## Troubleshooting
-
-### Backend won't start
-- Check MongoDB is running: `docker ps` or MongoDB service
-- Verify `.env` file exists and has all required values
-- Check Python version: `python --version` (needs 3.12+)
-
-### Frontend won't start
-- Check Node.js version: `node --version` (needs 18+)
-- Run `npm install` again
-- Clear cache: `rm -rf node_modules package-lock.json && npm install`
-
-### Docker issues
-- Make sure Docker Desktop is running
-- Try: `docker-compose down -v` then rebuild
-- Check Docker has enough memory (4GB+ recommended)
-
-### API connection errors
-- Verify backend is running on port 8000
-- Check `VITE_API_BASE_URL` in frontend `.env`
-- Check CORS settings in backend
-
-### TMDB API errors
-- Verify your TMDB API key is valid
-- Check you haven't exceeded rate limits
-- Ensure key is in `backend/.env`
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file
-
-## Acknowledgments
-
-- [TMDB](https://www.themoviedb.org/) for movie and TV show data
-- [AniList](https://anilist.co/) for anime data
-- [FastAPI](https://fastapi.tiangolo.com/) for the excellent framework
-- [shadcn/ui](https://ui.shadcn.com/) for UI components
-
-## Support
-
-For issues and questions, please open an issue on GitHub.
+This project is available under the [MIT License](LICENSE).
