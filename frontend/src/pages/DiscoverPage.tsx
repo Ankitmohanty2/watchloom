@@ -33,7 +33,7 @@ const DiscoverPage = () => {
   }, [searchQuery])
 
   const trending = useInfiniteQuery({
-    queryKey: ['trending', mediaType || 'all'],
+    queryKey: ['discover', 'trending', mediaType || 'all'],
     initialPageParam: 1,
     queryFn: ({ pageParam }) => mediaService.getTrending(mediaType || 'all', pageParam),
     getNextPageParam: (lastPage) => lastPage.has_next_page ? lastPage.page + 1 : undefined,
@@ -41,7 +41,7 @@ const DiscoverPage = () => {
   })
 
   const searchResults = useInfiniteQuery({
-    queryKey: ['search', activeSearch, mediaType],
+    queryKey: ['discover', 'search-results', activeSearch, mediaType],
     initialPageParam: 1,
     queryFn: ({ pageParam }) => mediaService.search(activeSearch, mediaType || undefined, pageParam),
     getNextPageParam: (lastPage) => lastPage.has_next_page ? lastPage.page + 1 : undefined,
@@ -54,7 +54,7 @@ const DiscoverPage = () => {
     isError: suggestionsError,
     refetch: retrySuggestions,
   } = useQuery({
-    queryKey: ['search', debouncedQuery, mediaType],
+    queryKey: ['discover', 'search-suggestions', debouncedQuery, mediaType],
     queryFn: () => mediaService.search(debouncedQuery, mediaType || undefined, 1),
     enabled: debouncedQuery.length >= 2,
     staleTime: 30 * 1000,

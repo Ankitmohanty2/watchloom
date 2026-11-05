@@ -35,7 +35,7 @@ export const MediaCollectionPage = ({
     isFetchingNextPage,
     isFetchNextPageError,
   } = useInfiniteQuery({
-    queryKey: ['popular', mediaType, collection],
+    queryKey: ['media-collection', mediaType, collection],
     initialPageParam: 1,
     queryFn: ({ pageParam }) => mediaService.getPopular(mediaType, pageParam, collection),
     getNextPageParam: (lastPage) => lastPage.has_next_page ? lastPage.page + 1 : undefined,

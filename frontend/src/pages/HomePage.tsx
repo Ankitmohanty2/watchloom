@@ -26,22 +26,22 @@ const HomePage = () => {
   const [isBackgroundTrailerPlaying, setIsBackgroundTrailerPlaying] = useState(autoplayAllowed)
   const [unavailableTrailerId, setUnavailableTrailerId] = useState<string | null>(null)
   const { data: trending, isLoading } = useQuery({
-    queryKey: ['trending', 'all'],
+    queryKey: ['home', 'trending', 'all'],
     queryFn: () => mediaService.getTrending('all', 1),
     retry: 2,
   })
   const { data: popularMovies } = useQuery({
-    queryKey: ['popular', 'movie', 'popular'],
+    queryKey: ['home', 'popular', 'movie', 'popular'],
     queryFn: () => mediaService.getPopular('movie', 1),
     retry: 1,
   })
   const { data: bollywoodMovies } = useQuery({
-    queryKey: ['popular', 'movie', 'bollywood'],
+    queryKey: ['home', 'popular', 'movie', 'bollywood'],
     queryFn: () => mediaService.getPopular('movie', 1, 'bollywood'),
     retry: 1,
   })
   const { data: popularAnime } = useQuery({
-    queryKey: ['popular', 'anime'],
+    queryKey: ['home', 'popular', 'anime'],
     queryFn: () => mediaService.getPopular('anime', 1),
   })
 
