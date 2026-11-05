@@ -1,26 +1,26 @@
 import api from './api'
-import type { Media } from '@/types'
+import type { Media, MediaPage } from '@/types'
 
 export const mediaService = {
-  async search(query: string, mediaType?: string, page = 1) {
+  async search(query: string, mediaType?: string, page = 1): Promise<MediaPage> {
     const params = new URLSearchParams({ query, page: page.toString() })
     if (mediaType) params.append('media_type', mediaType)
     const response = await api.get(`/api/v1/media/search?${params}`)
-    return response.data
+    return response.data as MediaPage
   },
 
-  async getTrending(mediaType = 'all', page = 1) {
+  async getTrending(mediaType = 'all', page = 1): Promise<MediaPage> {
     const response = await api.get('/api/v1/media/trending', {
       params: { media_type: mediaType, page },
     })
-    return response.data
+    return response.data as MediaPage
   },
 
-  async getPopular(mediaType: string, page = 1) {
+  async getPopular(mediaType: string, page = 1, collection: 'popular' | 'bollywood' = 'popular'): Promise<MediaPage> {
     const response = await api.get('/api/v1/media/popular', {
-      params: { media_type: mediaType, page },
+      params: { media_type: mediaType, page, collection },
     })
-    return response.data
+    return response.data as MediaPage
   },
 
   async getGenres(mediaType = 'movie') {

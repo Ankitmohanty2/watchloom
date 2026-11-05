@@ -1,6 +1,8 @@
+import type { ReactNode } from 'react'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { ArrowRight, RefreshCw } from 'lucide-react'
+import { useInfiniteQuery } from '@tanstack/react-query'
+import { ArrowRight, LoaderCircle, RefreshCw } from 'lucide-react'
 import { mediaService } from '@/services/mediaService'
 import { MediaCard } from '@/components/media/MediaCard'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -11,14 +13,43 @@ interface MediaCollectionPageProps {
   title: string
   eyebrow: string
   description: string
+  collection?: 'popular' | 'bollywood'
+  toolbar?: ReactNode
 }
 
-export const MediaCollectionPage = ({ mediaType, title, eyebrow, description }: MediaCollectionPageProps) => {
-  const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ['popular', mediaType],
-    queryFn: () => mediaService.getPopular(mediaType, 1),
+export const MediaCollectionPage = ({
+  mediaType,
+  title,
+  eyebrow,
+  description,
+  collection = 'popular',
+  toolbar,
+}: MediaCollectionPageProps) => {
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+  } = useInfiniteQuery({
+    queryKey: ['popular', mediaType, collection],
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => mediaService.getPopular(mediaType, pageParam, collection),
+    getNextPageParam: (lastPage) => lastPage.has_next_page ? lastPage.page + 1 : undefined,
   })
-  const items: Media[] = data?.results ?? []
+
+  const items: Media[] = useMemo(() => {
+    const seen = new Set<string>()
+    return (data?.pages.flatMap((page) => page.results) ?? []).filter((media) => {
+      const key = `${media.provider}:${media.provider_id}`
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+  }, [data])
 
   return (
     <main className="min-h-[65vh] bg-background text-foreground">
@@ -31,9 +62,10 @@ export const MediaCollectionPage = ({ mediaType, title, eyebrow, description }: 
             </p>
             <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground-strong sm:text-4xl">{title}</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted sm:text-base">{description}</p>
+            {toolbar && <div className="mt-5">{toolbar}</div>}
           </div>
           {!isLoading && !isError && items.length > 0 && (
-            <p className="shrink-0 text-sm text-muted-foreground">{items.length} titles</p>
+            <p className="shrink-0 text-sm text-muted-foreground">{items.length} titles loaded</p>
           )}
         </header>
 
@@ -50,11 +82,30 @@ export const MediaCollectionPage = ({ mediaType, title, eyebrow, description }: 
             </button>
           </div>
         ) : items.length > 0 ? (
-          <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-5 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {items.map((media) => (
-              <MediaCard key={`${media.provider}-${media.provider_id}`} media={media} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-5 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+              {items.map((media) => (
+                <MediaCard key={`${media.provider}-${media.provider_id}`} media={media} />
+              ))}
+            </div>
+            {hasNextPage && (
+              <div className="mt-10 flex flex-col items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => { void fetchNextPage() }}
+                  disabled={isFetchingNextPage}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border/15 bg-surface px-5 py-2.5 text-sm font-semibold text-foreground-strong transition hover:bg-hover/[0.06] disabled:cursor-wait disabled:opacity-60"
+                >
+                  {isFetchingNextPage ? (
+                    <><LoaderCircle className="h-4 w-4 animate-spin" /> Loading more</>
+                  ) : (
+                    <><RefreshCw className="h-4 w-4" /> {isFetchNextPageError ? 'Retry loading titles' : 'Load more titles'}</>
+                  )}
+                </button>
+                <p className="text-xs text-muted-foreground">{items.length} titles loaded so far</p>
+              </div>
+            )}
+          </>
         ) : (
           <div className="rounded-xl border border-border/[0.08] bg-surface px-6 py-14 text-center">
             <h2 className="font-display text-xl font-semibold text-foreground-strong">Nothing to show yet</h2>

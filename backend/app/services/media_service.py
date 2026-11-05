@@ -23,14 +23,17 @@ class MediaService:
     ) -> dict[str, Any]:
         """Search across all providers."""
         results = []
+        has_next_page = False
 
         if media_type in [None, "movie", "tv"]:
             # Search TMDB
             try:
                 tmdb_results = await self.tmdb.search_multi(query, page)
+                allowed_types = {"movie", "tv"} if media_type is None else {media_type}
                 for item in tmdb_results.get("results", []):
-                    if item.get("media_type") in ["movie", "tv"]:
+                    if item.get("media_type") in allowed_types:
                         results.append(self._normalize_tmdb_result(item))
+                has_next_page = page < tmdb_results.get("total_pages", page)
             except Exception:
                 pass
 
@@ -40,21 +43,25 @@ class MediaService:
                 anilist_results = await self.anilist.search_anime(query, page)
                 for item in anilist_results.get("media", []):
                     results.append(self._normalize_anilist_result(item))
+                page_info = anilist_results.get("pageInfo") or {}
+                has_next_page = has_next_page or page_info.get("hasNextPage", False)
             except Exception:
                 pass
 
-        return {"results": results, "page": page}
+        return {"results": results, "page": page, "has_next_page": has_next_page}
 
     async def get_trending(self, media_type: str = "all", page: int = 1) -> dict[str, Any]:
         """Get trending media."""
         results = []
+        has_next_page = False
 
         if media_type in ["all", "movie", "tv"]:
             try:
                 tmdb_results = await self.tmdb.get_trending("all", "week", page)
                 for item in tmdb_results.get("results", []):
-                    if item.get("media_type") in ["movie", "tv"]:
+                    if item.get("media_type") in ({"movie", "tv"} if media_type == "all" else {media_type}):
                         results.append(self._normalize_tmdb_result(item))
+                has_next_page = page < tmdb_results.get("total_pages", page)
             except Exception:
                 pass
 
@@ -63,29 +70,49 @@ class MediaService:
                 anilist_results = await self.anilist.get_trending_anime(page)
                 for item in anilist_results.get("media", []):
                     results.append(self._normalize_anilist_result(item))
+                page_info = anilist_results.get("pageInfo") or {}
+                has_next_page = has_next_page or page_info.get("hasNextPage", False)
             except Exception:
                 pass
 
-        return {"results": results, "page": page}
+        return {"results": results, "page": page, "has_next_page": has_next_page}
 
-    async def get_popular(self, media_type: str, page: int = 1) -> dict[str, Any]:
+    async def get_popular(
+        self, media_type: str, page: int = 1, collection: str = "popular"
+    ) -> dict[str, Any]:
         """Get popular media by type."""
         results = []
+        has_next_page = False
 
         if media_type == "movie":
-            tmdb_results = await self.tmdb.get_popular_movies(page)
+            if collection == "bollywood":
+                tmdb_results = await self.tmdb.discover_movie(
+                    {
+                        "include_adult": "false",
+                        "sort_by": "popularity.desc",
+                        "with_origin_country": "IN",
+                        "with_original_language": "hi",
+                        "page": page,
+                    }
+                )
+            else:
+                tmdb_results = await self.tmdb.get_popular_movies(page)
             for item in tmdb_results.get("results", []):
                 results.append(self._normalize_tmdb_result({**item, "media_type": "movie"}))
+            has_next_page = page < tmdb_results.get("total_pages", page)
         elif media_type == "tv":
             tmdb_results = await self.tmdb.get_popular_tv(page)
             for item in tmdb_results.get("results", []):
                 results.append(self._normalize_tmdb_result({**item, "media_type": "tv"}))
+            has_next_page = page < tmdb_results.get("total_pages", page)
         elif media_type == "anime":
             anilist_results = await self.anilist.get_popular_anime(page)
             for item in anilist_results.get("media", []):
                 results.append(self._normalize_anilist_result(item))
+            page_info = anilist_results.get("pageInfo") or {}
+            has_next_page = page_info.get("hasNextPage", False)
 
-        return {"results": results, "page": page}
+        return {"results": results, "page": page, "has_next_page": has_next_page}
 
     async def get_trailer_url(self, provider: str, provider_id: int, media_type: str) -> str | None:
         if provider == "tmdb" and media_type in {"movie", "tv"}:

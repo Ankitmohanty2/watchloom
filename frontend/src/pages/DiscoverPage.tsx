@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useEffect, useMemo, useState } from 'react'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { ArrowUpRight, LoaderCircle, Search, Sparkles, Star, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { mediaService } from '@/services/mediaService'
@@ -32,15 +32,19 @@ const DiscoverPage = () => {
     return () => window.clearTimeout(timeout)
   }, [searchQuery])
 
-  const { data: trending, isLoading: trendingLoading } = useQuery({
+  const trending = useInfiniteQuery({
     queryKey: ['trending', mediaType || 'all'],
-    queryFn: () => mediaService.getTrending(mediaType || 'all', 1),
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => mediaService.getTrending(mediaType || 'all', pageParam),
+    getNextPageParam: (lastPage) => lastPage.has_next_page ? lastPage.page + 1 : undefined,
     enabled: !activeSearch,
   })
 
-  const { data: searchResults, isLoading: searchLoading } = useQuery({
+  const searchResults = useInfiniteQuery({
     queryKey: ['search', activeSearch, mediaType],
-    queryFn: () => mediaService.search(activeSearch, mediaType || undefined, 1),
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => mediaService.search(activeSearch, mediaType || undefined, pageParam),
+    getNextPageParam: (lastPage) => lastPage.has_next_page ? lastPage.page + 1 : undefined,
     enabled: !!activeSearch,
   })
 
@@ -73,9 +77,20 @@ const DiscoverPage = () => {
   const showSuggestions = isSearchFocused && normalizedSearch.length >= 2 && !activeSearch
   const suggestions = (suggestionData?.results ?? []).slice(0, 6) as Media[]
 
-  const response = activeSearch ? searchResults : trending
-  const isLoading = activeSearch ? searchLoading : trendingLoading
-  const items: Media[] = response?.results ?? []
+  const resultsQuery = activeSearch ? searchResults : trending
+  const responsePages = resultsQuery.data?.pages ?? []
+  const items: Media[] = useMemo(() => {
+    const seen = new Set<string>()
+    return responsePages.flatMap((page) => page.results).filter((media) => {
+      const key = `${media.provider}:${media.provider_id}`
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+  }, [responsePages])
+  const isLoading = resultsQuery.isLoading
+  const isError = resultsQuery.isError
+  const { hasNextPage, fetchNextPage, isFetchingNextPage, isFetchNextPageError } = resultsQuery
   const featured = items[0]
   const featuredRating = formatMediaRating(featured?.rating, featured?.media_type)
   const remainingItems = items.slice(featured ? 1 : 0)
@@ -243,6 +258,14 @@ const DiscoverPage = () => {
           <div className="flex min-h-[360px] items-center justify-center rounded-2xl border border-border/[0.06] bg-surface/70">
             <LoadingSpinner size="lg" />
           </div>
+        ) : isError ? (
+          <div className="rounded-2xl border border-border/[0.07] bg-surface/70 px-6 py-14 text-center">
+            <h2 className="font-display text-xl font-semibold text-foreground-strong">The catalog is unavailable</h2>
+            <p className="mt-2 text-sm text-muted-foreground">Try again in a moment.</p>
+            <button onClick={() => { void resultsQuery.refetch() }} className="mt-5 inline-flex items-center gap-2 rounded-lg border border-border/15 px-4 py-2 text-sm font-medium text-foreground-strong transition hover:bg-hover/[0.06]">
+              <ArrowUpRight className="h-4 w-4" /> Retry
+            </button>
+          </div>
         ) : featured ? (
           <>
             <section aria-label="Featured title" className="group relative mb-10 min-h-[340px] overflow-hidden rounded-2xl border border-border/[0.08] bg-surface-hover sm:min-h-[390px]">
@@ -319,6 +342,23 @@ const DiscoverPage = () => {
               ) : (
                 <div className="rounded-xl border border-border/[0.07] bg-surface/60 px-6 py-10 text-center text-sm text-muted-foreground">
                   {activeSearch ? 'That’s the only match for now. Try another title or switch category.' : 'More titles are on the way.'}
+                </div>
+              )}
+              {hasNextPage && (
+                <div className="mt-9 flex flex-col items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => { void fetchNextPage() }}
+                    disabled={isFetchingNextPage}
+                    className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border/15 bg-surface px-5 py-2.5 text-sm font-semibold text-foreground-strong transition hover:bg-hover/[0.06] disabled:cursor-wait disabled:opacity-60"
+                  >
+                    {isFetchingNextPage ? (
+                      <><LoaderCircle className="h-4 w-4 animate-spin" /> Loading more</>
+                    ) : (
+                      <>{isFetchNextPageError ? 'Retry loading titles' : 'Load more titles'} <ArrowUpRight className="h-4 w-4" /></>
+                    )}
+                  </button>
+                  <p className="text-xs text-muted-foreground">{items.length} titles loaded so far</p>
                 </div>
               )}
             </section>

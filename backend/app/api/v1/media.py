@@ -1,5 +1,7 @@
 """Media API routes."""
 
+from typing import Literal
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.core.exceptions import ExternalAPIError
@@ -44,12 +46,18 @@ async def get_trending(
 async def get_popular(
     media_type: str = Query(...),
     page: int = Query(1, ge=1),
+    collection: Literal["popular", "bollywood"] = Query("popular"),
     db=Depends(get_database),
 ):
     """Get popular media by type."""
     try:
         media_service = MediaService(db)
-        results = await media_service.get_popular(media_type, page)
+        if collection == "bollywood" and media_type != "movie":
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="The Bollywood collection is only available for movies.",
+            )
+        results = await media_service.get_popular(media_type, page, collection)
         return results
     except ExternalAPIError as e:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(e)) from e

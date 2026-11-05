@@ -31,8 +31,13 @@ const HomePage = () => {
     retry: 2,
   })
   const { data: popularMovies } = useQuery({
-    queryKey: ['popular', 'movie'],
+    queryKey: ['popular', 'movie', 'popular'],
     queryFn: () => mediaService.getPopular('movie', 1),
+    retry: 1,
+  })
+  const { data: bollywoodMovies } = useQuery({
+    queryKey: ['popular', 'movie', 'bollywood'],
+    queryFn: () => mediaService.getPopular('movie', 1, 'bollywood'),
     retry: 1,
   })
   const { data: popularAnime } = useQuery({
@@ -181,7 +186,16 @@ const HomePage = () => {
           />
         )}
 
-        {popularAnime?.results?.length > 0 && (
+        {bollywoodMovies && bollywoodMovies.results.length > 0 && (
+          <MediaRail
+            eyebrow="Indian cinema · Hindi language"
+            title="Bollywood picks"
+            items={bollywoodMovies.results as Media[]}
+            to="/movies?collection=bollywood"
+          />
+        )}
+
+        {popularAnime && popularAnime.results.length > 0 && (
           <MediaRail eyebrow="Animation and more" title="Popular anime" items={popularAnime.results as Media[]} to="/anime" />
         )}
 

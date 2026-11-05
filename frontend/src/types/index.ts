@@ -48,6 +48,12 @@ export interface Media {
   crew?: any[]
 }
 
+export interface MediaPage {
+  results: Media[]
+  page: number
+  has_next_page: boolean
+}
+
 export interface LibraryEntry {
   id: string
   user_id: string
