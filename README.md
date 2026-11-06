@@ -101,6 +101,25 @@ docker compose up --build
 
 The application is available at `http://localhost:5173`, and the API at `http://localhost:8000`. Stop the services with `Ctrl+C`, or run `docker compose down` in another terminal.
 
+## Deploy on Vercel
+
+The root [`vercel.json`](vercel.json) configures a Vercel Services deployment with two services:
+
+- `frontend` builds the Vite app from `frontend/` and serves all non-API paths.
+- `backend` runs the FastAPI app from `backend/` and receives requests under `/api/*`.
+
+The frontend uses same-origin `/api/v1/...` requests on Vercel, so leave `VITE_API_BASE_URL` unset in the Vercel project settings. The Vercel-specific Vite mode is configured to use the public `/api/*` rewrite.
+
+In the Vercel project, import the repository from its root and add the backend environment variables from `backend/.env.example` under Project Settings. Use a hosted MongoDB connection string and production secrets; do not commit credentials. For email OTP, configure the SMTP or Resend variables on the backend service.
+
+To run the services locally through Vercel's router, install the Vercel CLI and run:
+
+```bash
+vercel dev
+```
+
+The browser calls the backend through the public `/api/*` rewrite. This repo has no server-side service-to-service calls that need Vercel bindings; bindings are runtime-only and are not available to the Vite browser bundle.
+
 ## Useful commands
 
 ### Frontend

@@ -1,12 +1,12 @@
 import axios from 'axios'
 import { useAuthStore } from '@/store/authStore'
 
-const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/+$/, '')
-const apiBaseUrl = import.meta.env.PROD
-  ? configuredApiBaseUrl?.startsWith('https://')
-    ? configuredApiBaseUrl
-    : 'https://watchloom.onrender.com'
-  : configuredApiBaseUrl || 'http://localhost:8000'
+const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim()
+const apiBaseUrl = configuredApiBaseUrl === undefined
+  ? import.meta.env.PROD
+    ? 'https://watchloom.onrender.com'
+    : 'http://localhost:8000'
+  : configuredApiBaseUrl.replace(/\/+$/, '')
 
 const api = axios.create({
   baseURL: apiBaseUrl,
