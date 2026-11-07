@@ -13,6 +13,7 @@ import { MediaCard } from '@/components/media/MediaCard'
 import { EpisodeProgressPanel } from '@/components/media/EpisodeProgressPanel'
 import { MediaSynopsis } from '@/components/media/MediaSynopsis'
 import { formatMediaRating } from '@/utils/media'
+import { getPosterImageUrl } from '@/utils/mediaImages'
 
 const MediaDetailsPage = () => {
   const { id } = useParams()
@@ -104,7 +105,7 @@ const MediaDetailsPage = () => {
           <aside>
             <div className="aspect-[2/3] max-w-[260px] overflow-hidden rounded-xl border border-border/10 bg-surface-alt shadow-[0_18px_50px_rgba(0,0,0,0.4)]">
               {media.poster_path ? (
-                <img src={media.poster_path} alt={`${media.title} poster`} className="h-full w-full object-cover" />
+                <img src={getPosterImageUrl(media.poster_path)} alt={`${media.title} poster`} decoding="async" className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">Artwork unavailable</div>
               )}

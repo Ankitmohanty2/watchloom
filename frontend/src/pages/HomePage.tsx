@@ -6,6 +6,7 @@ import { mediaService } from '@/services/mediaService'
 import { TrailerButton } from '@/components/media/TrailerButton'
 import { MediaSynopsis } from '@/components/media/MediaSynopsis'
 import { formatMediaRating } from '@/utils/media'
+import { getBackdropImageUrl } from '@/utils/mediaImages'
 import { YoutubeBackgroundPlayer } from '@/components/media/YoutubeBackgroundPlayer'
 import { canAutoplayBackgroundVideo, getYoutubeVideoId } from '@/utils/youtube'
 import { CommunityFeedbackSection } from '@/components/home/CommunityFeedbackSection'
@@ -73,9 +74,10 @@ const HomePage = () => {
         <div className="absolute inset-0 overflow-hidden">
           {heroImage && (
             <img
-              src={heroImage}
+              src={getBackdropImageUrl(heroImage)}
               alt=""
               className="home-hero-image absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700"
+              fetchPriority="high"
             />
           )}
           {showBackgroundTrailer && trailerVideoId && (

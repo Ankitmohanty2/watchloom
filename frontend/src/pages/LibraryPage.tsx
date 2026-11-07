@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button'
 
 const statuses = [
   { value: '', label: 'All titles' },
-  { value: 'watching', label: 'Watching' },
+  { value: 'watching', label: 'Ongoing' },
   { value: 'completed', label: 'Completed' },
   { value: 'plan_to_watch', label: 'Plan to watch' },
   { value: 'on_hold', label: 'On hold' },
@@ -68,7 +68,7 @@ const LibraryPage = () => {
             <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-5 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
               {data.items.map((item: any) => (
                 <div key={item.id} className="group relative min-w-0">
-                  {item.media && <MediaCard media={item.media} />}
+                  {item.media && <MediaCard media={item.media} libraryStatus={item.status} />}
                   <button
                     type="button"
                     aria-label={`Remove ${item.media?.title || 'title'} from library`}

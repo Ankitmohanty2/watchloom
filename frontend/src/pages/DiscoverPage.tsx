@@ -8,6 +8,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import type { Media } from '@/types'
 import { formatMediaRating } from '@/utils/media'
 import { MediaSynopsis } from '@/components/media/MediaSynopsis'
+import { getBackdropImageUrl, getPosterImageUrl } from '@/utils/mediaImages'
 
 const mediaFilters = [
   { label: 'Everything', value: '' },
@@ -196,7 +197,7 @@ const DiscoverPage = () => {
                             >
                               <div className="h-14 w-10 shrink-0 overflow-hidden rounded-md bg-hover/[0.06]">
                                 {media.poster_path ? (
-                                  <img src={media.poster_path} alt="" className="h-full w-full object-cover" />
+                                  <img src={getPosterImageUrl(media.poster_path)} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
                                 ) : (
                                   <div className="flex h-full items-center justify-center"><Search className="h-4 w-4 text-muted-foreground" /></div>
                                 )}
@@ -271,7 +272,7 @@ const DiscoverPage = () => {
             <section aria-label="Featured title" className="discover-featured group relative mb-10 min-h-[340px] overflow-hidden rounded-[1.75rem] border border-border/[0.08] bg-surface-hover sm:min-h-[390px]">
               {featured.backdrop_path || featured.poster_path ? (
                 <img
-                  src={featured.backdrop_path || featured.poster_path}
+                  src={getBackdropImageUrl(featured.backdrop_path || featured.poster_path)}
                   alt=""
                   className="discover-featured-image absolute inset-0 h-full w-full object-cover object-center opacity-65 transition-transform duration-700 group-hover:scale-[1.015]"
                 />

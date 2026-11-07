@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 
@@ -5,25 +6,25 @@ import { useAuthStore } from '@/store/authStore'
 import { MainLayout } from '@/components/layout/MainLayout'
 import { AuthLayout } from '@/components/layout/AuthLayout'
 
-// Pages
-import HomePage from '@/pages/HomePage'
-import SignInPage from '@/pages/SignInPage'
-import SignUpPage from '@/pages/SignUpPage'
-import ForgotPasswordPage from '@/pages/ForgotPasswordPage'
-import DiscoverPage from '@/pages/DiscoverPage'
-import AnimePage from '@/pages/AnimePage'
-import MoviesPage from '@/pages/MoviesPage'
-import SeriesPage from '@/pages/SeriesPage'
-import MediaDetailsPage from '@/pages/MediaDetailsPage'
-import MediaFetchPage from '@/pages/MediaFetchPage'
-import LibraryPage from '@/pages/LibraryPage'
-import StatisticsPage from '@/pages/StatisticsPage'
-import ProfilePage from '@/pages/ProfilePage'
-import SettingsPage from '@/pages/SettingsPage'
-import TermsPage from '@/pages/TermsPage'
-import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage'
-import AboutPage from '@/pages/AboutPage'
-import NotFoundPage from '@/pages/NotFoundPage'
+// Load route code on demand so charts and account flows don't delay the home page.
+const HomePage = lazy(() => import('@/pages/HomePage'))
+const SignInPage = lazy(() => import('@/pages/SignInPage'))
+const SignUpPage = lazy(() => import('@/pages/SignUpPage'))
+const ForgotPasswordPage = lazy(() => import('@/pages/ForgotPasswordPage'))
+const DiscoverPage = lazy(() => import('@/pages/DiscoverPage'))
+const AnimePage = lazy(() => import('@/pages/AnimePage'))
+const MoviesPage = lazy(() => import('@/pages/MoviesPage'))
+const SeriesPage = lazy(() => import('@/pages/SeriesPage'))
+const MediaDetailsPage = lazy(() => import('@/pages/MediaDetailsPage'))
+const MediaFetchPage = lazy(() => import('@/pages/MediaFetchPage'))
+const LibraryPage = lazy(() => import('@/pages/LibraryPage'))
+const StatisticsPage = lazy(() => import('@/pages/StatisticsPage'))
+const ProfilePage = lazy(() => import('@/pages/ProfilePage'))
+const SettingsPage = lazy(() => import('@/pages/SettingsPage'))
+const TermsPage = lazy(() => import('@/pages/TermsPage'))
+const PrivacyPolicyPage = lazy(() => import('@/pages/PrivacyPolicyPage'))
+const AboutPage = lazy(() => import('@/pages/AboutPage'))
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuthStore()
@@ -37,7 +38,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 export const AppRouter = () => {
   return (
-    <Routes>
+    <Suspense fallback={<div className="min-h-[65vh] bg-background" aria-label="Loading page" />}>
+      <Routes>
       {/* Public routes */}
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
@@ -76,6 +78,7 @@ export const AppRouter = () => {
 
       {/* 404 */}
       <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+      </Routes>
+    </Suspense>
   )
 }

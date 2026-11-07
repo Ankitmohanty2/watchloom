@@ -25,7 +25,7 @@ export const BrandMark = ({ size = 'regular', showName = true, className }: Bran
         </span>
       ) : (
         <img
-          src="/images/watchloom-logo.png?v=2"
+          src="/images/watchloom-logo-256.png"
           alt=""
           aria-hidden="true"
           onError={() => setLogoFailed(true)}

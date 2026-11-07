@@ -1,13 +1,23 @@
 import { Link } from 'react-router-dom'
 import { Star } from 'lucide-react'
-import type { Media } from '@/types'
+import type { LibraryEntry, Media } from '@/types'
 import { formatMediaRating } from '@/utils/media'
+import { getPosterImageUrl } from '@/utils/mediaImages'
 
 interface MediaCardProps {
   media: Media
+  libraryStatus?: LibraryEntry['status']
 }
 
-export const MediaCard = ({ media }: MediaCardProps) => {
+const libraryStatusLabels: Record<LibraryEntry['status'], string> = {
+  plan_to_watch: 'Plan to watch',
+  watching: 'Ongoing',
+  completed: 'Completed',
+  on_hold: 'On hold',
+  dropped: 'Dropped',
+}
+
+export const MediaCard = ({ media, libraryStatus }: MediaCardProps) => {
   const linkTo = media.id
     ? `/media/${media.id}`
     : `/media/fetch?provider=${media.provider}&id=${media.provider_id}&type=${media.media_type}`
@@ -19,10 +29,11 @@ export const MediaCard = ({ media }: MediaCardProps) => {
       <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-border/[0.08] bg-surface-hover shadow-[0_8px_24px_rgba(0,0,0,0.2)]">
         {media.poster_path ? (
           <img
-            src={media.poster_path}
+            src={getPosterImageUrl(media.poster_path)}
             alt={media.title}
             className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.035] group-hover:brightness-105"
             loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className="flex h-full items-center justify-center px-4 text-center text-sm font-medium text-muted-foreground">
@@ -30,7 +41,12 @@ export const MediaCard = ({ media }: MediaCardProps) => {
           </div>
         )}
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/65 to-transparent opacity-70 transition-opacity group-hover:opacity-100" />
-        <span className="absolute left-2.5 top-2.5 rounded-md border border-border/15 bg-[#101218]/80 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/90 backdrop-blur-sm">
+        {libraryStatus && (
+          <span className="absolute left-2.5 top-2.5 rounded-md border border-primary-500/35 bg-[#101218]/90 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.1em] text-primary-300 backdrop-blur-sm">
+            {libraryStatusLabels[libraryStatus]}
+          </span>
+        )}
+        <span className={`absolute left-2.5 rounded-md border border-border/15 bg-[#101218]/80 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/90 backdrop-blur-sm ${libraryStatus ? 'top-10' : 'top-2.5'}`}>
           {media.media_type === 'tv' ? 'Series' : media.media_type}
         </span>
         {rating && (

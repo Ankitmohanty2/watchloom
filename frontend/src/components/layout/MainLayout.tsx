@@ -17,7 +17,7 @@ const Footer = () => {
               className="group mb-4 inline-flex items-center gap-3 rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary-500"
             >
               <img
-                src="/images/watchloom-logo.png?v=2"
+                src="/images/watchloom-logo-256.png"
                 alt=""
                 className="h-12 w-12 rounded-xl object-contain"
               />

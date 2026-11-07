@@ -4,6 +4,7 @@ import { Pause, Play } from 'lucide-react'
 import { mediaService } from '@/services/mediaService'
 import { YoutubeBackgroundPlayer } from '@/components/media/YoutubeBackgroundPlayer'
 import { canAutoplayBackgroundVideo, getYoutubeVideoId } from '@/utils/youtube'
+import { getBackdropImageUrl } from '@/utils/mediaImages'
 
 interface TrailerBackdropProps {
   image?: string
@@ -35,9 +36,10 @@ export const TrailerBackdrop = ({ image, provider, providerId, mediaType, traile
     <div className="absolute inset-0 overflow-hidden bg-surface">
       {image && (
         <img
-          src={image}
+          src={getBackdropImageUrl(image)}
           alt=""
           className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ${showVideo ? 'opacity-25' : 'opacity-70'}`}
+          decoding="async"
         />
       )}
       {showVideo && trailerVideoId && (

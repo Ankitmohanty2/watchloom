@@ -3,6 +3,7 @@ import { ArrowRight, Clock3 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { progressService } from '@/services/progressService'
 import { useAuthStore } from '@/store/authStore'
+import { getPosterImageUrl } from '@/utils/mediaImages'
 
 export const ContinueWatchingRail = () => {
   const { isAuthenticated } = useAuthStore()
@@ -42,7 +43,7 @@ export const ContinueWatchingRail = () => {
               <Link key={media.id} to={mediaPath} className="group w-[min(82vw,390px)] shrink-0 snap-start overflow-hidden rounded-2xl border border-border/[0.1] bg-surface transition-colors hover:border-primary-500/35 sm:w-[350px]">
                 <div className="flex gap-4 p-3.5">
                   <div className="relative h-[104px] w-[72px] shrink-0 overflow-hidden rounded-xl bg-surface-alt">
-                    {media.poster_path ? <img src={media.poster_path} alt="" loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /> : <div className="flex h-full items-center justify-center px-2 text-center text-[10px] text-muted">{media.title}</div>}
+                    {media.poster_path ? <img src={getPosterImageUrl(media.poster_path)} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /> : <div className="flex h-full items-center justify-center px-2 text-center text-[10px] text-muted">{media.title}</div>}
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col justify-center py-1">
                     <span className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-muted">{media.media_type === 'tv' ? 'Series' : media.media_type}</span>
