@@ -16,9 +16,19 @@ def setup_logging() -> None:
         handlers=[logging.StreamHandler(sys.stdout)],
     )
 
-    # Set specific loggers
-    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
-    logging.getLogger("httpx").setLevel(logging.WARNING)
+    # Keep framework and database transport chatter out of normal app logs.
+    for logger_name in (
+        "uvicorn.access",
+        "httpx",
+        "motor",
+        "pymongo",
+        "pymongo.command",
+        "pymongo.connection",
+        "pymongo.serverSelection",
+        "pymongo.topology",
+        "pymongo.pool",
+    ):
+        logging.getLogger(logger_name).setLevel(logging.WARNING)
 
 
 def get_logger(name: str) -> logging.Logger:

@@ -84,8 +84,16 @@ class TMDBClient:
             "genres": [genre["name"] for genre in movie.get("genres", [])]
             if "genres" in movie
             else [],
-            "languages": movie.get("spoken_languages", []),
-            "countries": movie.get("production_countries", []),
+            "languages": [
+                language.get("english_name") or language.get("name") or language.get("iso_639_1")
+                for language in movie.get("spoken_languages", [])
+                if isinstance(language, dict)
+            ],
+            "countries": [
+                country.get("name") or country.get("iso_3166_1")
+                for country in movie.get("production_countries", [])
+                if isinstance(country, dict)
+            ],
             "rating": movie.get("vote_average"),
             "runtime": movie.get("runtime"),
             "trailer_url": self._select_trailer_url((movie.get("videos") or {}).get("results", [])),
@@ -105,8 +113,16 @@ class TMDBClient:
             "genres": [genre["name"] for genre in tv.get("genres", [])]
             if "genres" in tv
             else [],
-            "languages": tv.get("spoken_languages", []),
-            "countries": tv.get("origin_country", []),
+            "languages": [
+                language.get("english_name") or language.get("name") or language.get("iso_639_1")
+                for language in tv.get("spoken_languages", [])
+                if isinstance(language, dict)
+            ],
+            "countries": [
+                country.get("name") if isinstance(country, dict) else country
+                for country in tv.get("origin_country", [])
+                if isinstance(country, (str, dict))
+            ],
             "rating": tv.get("vote_average"),
             "trailer_url": self._select_trailer_url((tv.get("videos") or {}).get("results", [])),
             "season_count": tv.get("number_of_seasons"),

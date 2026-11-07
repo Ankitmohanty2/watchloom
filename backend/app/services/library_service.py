@@ -3,7 +3,7 @@ from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from app.core.exceptions import ConflictError, NotFoundError
+from app.core.exceptions import NotFoundError
 from app.models.library import LibraryModel
 from app.repositories.library_repository import LibraryRepository
 from app.repositories.media_repository import MediaRepository
@@ -25,7 +25,12 @@ class LibraryService:
         # Check if already in library
         existing = await self.library_repo.find_by_user_and_media(user_id, media_id)
         if existing:
-            raise ConflictError("Media already in library")
+            if existing.get("status") != status:
+                existing = await self.library_repo.update(
+                    str(existing["_id"]), user_id, {"status": status}
+                )
+            media_doc = await self.media_repo.find_by_id(media_id)
+            return LibraryModel.to_dict(existing, media_doc)
 
         # Verify media exists
         media_doc = await self.media_repo.find_by_id(media_id)

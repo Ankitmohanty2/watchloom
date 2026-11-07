@@ -7,6 +7,21 @@ class MediaModel:
     """Media document model for MongoDB."""
 
     @staticmethod
+    def _string_values(values: Any, keys: tuple[str, ...]) -> list[str]:
+        """Normalize provider strings and legacy provider objects for API responses."""
+        if not isinstance(values, (list, tuple)):
+            return []
+
+        normalized: list[str] = []
+        for value in values:
+            candidate = value
+            if isinstance(value, dict):
+                candidate = next((value.get(key) for key in keys if value.get(key)), None)
+            if isinstance(candidate, str) and candidate.strip():
+                normalized.append(candidate.strip())
+        return normalized
+
+    @staticmethod
     def create(
         media_type: str,
         title: str,
@@ -25,8 +40,12 @@ class MediaModel:
             "backdrop_path": kwargs.get("backdrop_path"),
             "release_date": kwargs.get("release_date"),
             "genres": kwargs.get("genres", []),
-            "languages": kwargs.get("languages", []),
-            "countries": kwargs.get("countries", []),
+            "languages": MediaModel._string_values(
+                kwargs.get("languages", []), ("english_name", "name", "iso_639_1")
+            ),
+            "countries": MediaModel._string_values(
+                kwargs.get("countries", []), ("name", "iso_3166_1", "code")
+            ),
             "rating": kwargs.get("rating"),
             "runtime": kwargs.get("runtime"),
             "season_count": kwargs.get("season_count"),
@@ -55,8 +74,12 @@ class MediaModel:
             "backdrop_path": media_doc.get("backdrop_path"),
             "release_date": media_doc.get("release_date"),
             "genres": media_doc.get("genres", []),
-            "languages": media_doc.get("languages", []),
-            "countries": media_doc.get("countries", []),
+            "languages": MediaModel._string_values(
+                media_doc.get("languages", []), ("english_name", "name", "iso_639_1")
+            ),
+            "countries": MediaModel._string_values(
+                media_doc.get("countries", []), ("name", "iso_3166_1", "code")
+            ),
             "rating": media_doc.get("rating"),
             "runtime": media_doc.get("runtime"),
             "season_count": media_doc.get("season_count"),

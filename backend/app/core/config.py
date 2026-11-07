@@ -48,7 +48,11 @@ class Settings(BaseSettings):
 
     # CORS
     frontend_url: str = "http://localhost:5173"
-    cors_origins: list[str] = ["http://localhost:5173", "http://localhost:3000"]
+    cors_origins: list[str] = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://watchloom.ankitmohanty.in",
+    ]
 
     @field_validator("cors_origins", mode="before")
     @classmethod

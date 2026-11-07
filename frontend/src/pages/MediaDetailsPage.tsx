@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, CalendarDays, Clock3, Plus, RotateCw, Star } from 'lucide-react'
+import { ArrowLeft, CalendarDays, Check, ChevronDown, Clock3, Plus, RotateCw, Star } from 'lucide-react'
 import { mediaService } from '@/services/mediaService'
 import { libraryService } from '@/services/libraryService'
 import { useAuthStore } from '@/store/authStore'
@@ -14,12 +14,25 @@ import { EpisodeProgressPanel } from '@/components/media/EpisodeProgressPanel'
 import { MediaSynopsis } from '@/components/media/MediaSynopsis'
 import { formatMediaRating } from '@/utils/media'
 import { getPosterImageUrl } from '@/utils/mediaImages'
+import type { LibraryEntry } from '@/types'
+
+const libraryStatuses: Array<{ value: LibraryEntry['status']; label: string }> = [
+  { value: 'plan_to_watch', label: 'Plan to watch' },
+  { value: 'watching', label: 'Watching' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'on_hold', label: 'On hold' },
+  { value: 'dropped', label: 'Dropped' },
+]
 
 const MediaDetailsPage = () => {
   const { id } = useParams()
   const { isAuthenticated } = useAuthStore()
   const queryClient = useQueryClient()
-  const [selectedStatus, setSelectedStatus] = useState('plan_to_watch')
+  const [selectedStatus, setSelectedStatus] = useState<LibraryEntry['status']>('plan_to_watch')
+  const [statusMenuOpen, setStatusMenuOpen] = useState(false)
+  const statusMenuRef = useRef<HTMLDivElement>(null)
+  const statusTriggerRef = useRef<HTMLButtonElement>(null)
+  const statusOptionRefs = useRef<Array<HTMLButtonElement | null>>([])
 
   const { data: media, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ['media', id],
@@ -45,8 +58,42 @@ const MediaDetailsPage = () => {
 
   const addMutation = useMutation({
     mutationFn: (status: string) => libraryService.addToLibrary(id!, status),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['library'] }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['library'] })
+    },
   })
+
+  const openStatusMenu = () => {
+    setStatusMenuOpen(true)
+    requestAnimationFrame(() => {
+      const selectedIndex = libraryStatuses.findIndex((status) => status.value === selectedStatus)
+      statusOptionRefs.current[selectedIndex]?.focus()
+    })
+  }
+
+  const handleStatusMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      setStatusMenuOpen(false)
+      statusTriggerRef.current?.focus()
+    }
+  }
+
+  const handleStatusOptionKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    index: number,
+  ) => {
+    const lastIndex = libraryStatuses.length - 1
+    let nextIndex: number | null = null
+    if (event.key === 'ArrowDown') nextIndex = index === lastIndex ? 0 : index + 1
+    if (event.key === 'ArrowUp') nextIndex = index === 0 ? lastIndex : index - 1
+    if (event.key === 'Home') nextIndex = 0
+    if (event.key === 'End') nextIndex = lastIndex
+    if (nextIndex !== null) {
+      event.preventDefault()
+      statusOptionRefs.current[nextIndex]?.focus()
+    }
+  }
 
   if (isLoading) {
     return <div className="flex min-h-[60vh] items-center justify-center bg-background"><LoadingSpinner size="lg" /></div>
@@ -111,25 +158,69 @@ const MediaDetailsPage = () => {
               )}
             </div>
             {isAuthenticated ? (
-              <div className="mt-4 rounded-xl border border-border/[0.08] bg-surface p-4">
+              <div className="mt-4 rounded-2xl border border-border/[0.08] bg-surface p-4 shadow-sm">
                 <label htmlFor="library-status" className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted">Add to your library</label>
-                <select
-                  id="library-status"
-                  value={selectedStatus}
-                  onChange={(event) => setSelectedStatus(event.target.value)}
-                  className="mb-3 w-full rounded-lg border border-border/10 bg-surface-alt px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary-500"
+                <div
+                  ref={statusMenuRef}
+                  className="relative mb-3"
+                  onBlur={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                      setStatusMenuOpen(false)
+                    }
+                  }}
+                  onKeyDown={handleStatusMenuKeyDown}
                 >
-                  <option value="plan_to_watch">Plan to watch</option>
-                  <option value="watching">Watching</option>
-                  <option value="completed">Completed</option>
-                  <option value="on_hold">On hold</option>
-                  <option value="dropped">Dropped</option>
-                </select>
+                  <button
+                    ref={statusTriggerRef}
+                    id="library-status"
+                    type="button"
+                    aria-haspopup="listbox"
+                    aria-expanded={statusMenuOpen}
+                    aria-controls="library-status-options"
+                    onClick={() => statusMenuOpen ? setStatusMenuOpen(false) : openStatusMenu()}
+                    className="flex h-11 w-full items-center justify-between rounded-xl border border-border/10 bg-surface-alt px-3.5 text-left text-sm font-medium text-foreground shadow-sm outline-none transition hover:border-border/20 focus-visible:ring-2 focus-visible:ring-primary-500/60"
+                  >
+                    <span>{libraryStatuses.find((status) => status.value === selectedStatus)?.label}</span>
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${statusMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+                  </button>
+                  {statusMenuOpen && (
+                    <div
+                      id="library-status-options"
+                      role="listbox"
+                      aria-labelledby="library-status"
+                      className="absolute inset-x-0 top-full z-40 mt-2 overflow-hidden rounded-xl border border-border/15 bg-surface-alt p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.28)] ring-1 ring-black/5"
+                    >
+                      {libraryStatuses.map((status, index) => {
+                        const isSelected = selectedStatus === status.value
+                        return (
+                          <button
+                            key={status.value}
+                            ref={(element) => { statusOptionRefs.current[index] = element }}
+                            type="button"
+                            role="option"
+                            aria-selected={isSelected}
+                            onKeyDown={(event) => handleStatusOptionKeyDown(event, index)}
+                            onClick={() => {
+                              setSelectedStatus(status.value)
+                              setStatusMenuOpen(false)
+                              statusTriggerRef.current?.focus()
+                              addMutation.reset()
+                            }}
+                            className={`flex min-h-10 w-full items-center justify-between rounded-lg px-3 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60 ${isSelected ? 'bg-primary-500/10 font-semibold text-foreground-strong' : 'text-foreground hover:bg-hover/[0.07]'}`}
+                          >
+                            {status.label}
+                            {isSelected && <Check className="h-4 w-4 text-primary-500" aria-hidden="true" />}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
                 <Button className="w-full" onClick={() => addMutation.mutate(selectedStatus)} disabled={addMutation.isPending}>
                   <Plus className="mr-2 h-4 w-4" />
                   {addMutation.isPending ? 'Saving…' : 'Add to library'}
                 </Button>
-                {addMutation.isSuccess && <p role="status" className="mt-3 text-sm text-emerald-300">Added to your library.</p>}
+                {addMutation.isSuccess && <p role="status" className="mt-3 text-sm text-emerald-300">Saved to your library.</p>}
                 {addMutation.isError && <p role="alert" className="mt-3 text-sm text-red-300">{mutationError}</p>}
               </div>
             ) : (
