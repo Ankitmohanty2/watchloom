@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, CalendarDays, Check, ChevronDown, Clock3, Plus, RotateCw, Star } from 'lucide-react'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { ArrowLeft, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, Clock3, Plus, RotateCw, Star } from 'lucide-react'
 import { mediaService } from '@/services/mediaService'
 import { libraryService } from '@/services/libraryService'
 import { useAuthStore } from '@/store/authStore'
@@ -30,6 +30,14 @@ const MediaDetailsPage = () => {
   const queryClient = useQueryClient()
   const [selectedStatus, setSelectedStatus] = useState<LibraryEntry['status']>('plan_to_watch')
   const [statusMenuOpen, setStatusMenuOpen] = useState(false)
+  const [similarPageState, setSimilarPageState] = useState({ mediaId: id, page: 1 })
+  const similarPage = similarPageState.mediaId === id ? similarPageState.page : 1
+  const updateSimilarPage = (update: (page: number) => number) => {
+    setSimilarPageState((current) => ({
+      mediaId: id,
+      page: update(current.mediaId === id ? current.page : 1),
+    }))
+  }
   const statusMenuRef = useRef<HTMLDivElement>(null)
   const statusTriggerRef = useRef<HTMLButtonElement>(null)
   const statusOptionRefs = useRef<Array<HTMLButtonElement | null>>([])
@@ -47,14 +55,15 @@ const MediaDetailsPage = () => {
 
   const provider = media?.provider || (media?.media_type === 'anime' ? 'anilist' : 'tmdb')
   const providerId = media?.provider_id || media?.provider_ids?.tmdb_id || media?.provider_ids?.anilist_id
-  const { data: similarTitles = [], isLoading: similarIsLoading, isError: similarIsError } = useQuery({
-    queryKey: ['media', 'similar', provider, providerId, media?.media_type],
+  const { data: similarResponse, isLoading: similarIsLoading, isFetching: similarIsFetching, isError: similarIsError } = useQuery({
+    queryKey: ['media', 'similar', provider, providerId, media?.media_type, similarPage],
     queryFn: async () => {
-      const response = await mediaService.getSimilar(provider, providerId!, media!.media_type)
-      return response.results
+      return mediaService.getSimilar(provider, providerId!, media!.media_type, similarPage)
     },
     enabled: Boolean(media && providerId),
+    placeholderData: keepPreviousData,
   })
+  const similarTitles = similarResponse?.results ?? []
 
   const addMutation = useMutation({
     mutationFn: (status: string) => libraryService.addToLibrary(id!, status),
@@ -307,9 +316,32 @@ const MediaDetailsPage = () => {
               <p className="text-sm text-muted-foreground">Similar titles couldn’t load right now.</p>
             ) : (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                {similarTitles.slice(0, 12).map((title) => (
+                {similarTitles.map((title) => (
                   <MediaCard key={`${title.provider}-${title.provider_id}`} media={title} />
                 ))}
+              </div>
+            )}
+            {!similarIsError && similarTitles.length > 0 && (
+              <div className="mt-8 flex items-center justify-center gap-3" aria-label="Similar title pages">
+                <button
+                  type="button"
+                  onClick={() => updateSimilarPage((page) => Math.max(1, page - 1))}
+                  disabled={similarPage === 1 || similarIsFetching}
+                  className="inline-flex h-10 items-center gap-2 rounded-full border border-border/15 px-4 text-sm font-medium text-foreground transition hover:bg-hover/[0.06] disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  <ChevronLeft className="h-4 w-4" /> Previous
+                </button>
+                <span className="min-w-24 text-center text-sm tabular-nums text-muted-foreground" aria-live="polite">
+                  {similarIsFetching ? `Loading page ${similarPage}…` : `Page ${similarResponse?.page ?? similarPage}`}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => updateSimilarPage((page) => page + 1)}
+                  disabled={!similarResponse?.has_next_page || similarIsFetching}
+                  className="inline-flex h-10 items-center gap-2 rounded-full border border-border/15 px-4 text-sm font-medium text-foreground transition hover:bg-hover/[0.06] disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  Next <ChevronRight className="h-4 w-4" />
+                </button>
               </div>
             )}
           </section>

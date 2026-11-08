@@ -127,9 +127,11 @@ class MediaService:
     ) -> dict[str, Any]:
         """Return provider recommendations normalized for media cards."""
         results = []
+        has_next_page = False
 
         if provider == "tmdb" and media_type == "movie":
             response = await self.tmdb.get_similar_movies(provider_id, page)
+            has_next_page = page < response.get("total_pages", page)
             results = [
                 self._normalize_tmdb_result({**item, "media_type": "movie"})
                 for item in response.get("results", [])
@@ -137,13 +139,16 @@ class MediaService:
             ]
         elif provider == "tmdb" and media_type == "tv":
             response = await self.tmdb.get_similar_tv(provider_id, page)
+            has_next_page = page < response.get("total_pages", page)
             results = [
                 self._normalize_tmdb_result({**item, "media_type": "tv"})
                 for item in response.get("results", [])
                 if item.get("id") != provider_id
             ]
         elif provider == "anilist" and media_type == "anime":
-            recommendations = await self.anilist.get_recommended_anime(provider_id, page)
+            response = await self.anilist.get_recommended_anime(provider_id, page)
+            recommendations = response.get("results", [])
+            has_next_page = response.get("has_next_page", False)
             seen_ids = set()
             for recommendation in recommendations:
                 item = recommendation.get("mediaRecommendation") or {}
@@ -153,7 +158,7 @@ class MediaService:
                 seen_ids.add(item_id)
                 results.append(self._normalize_anilist_result(item))
 
-        return {"results": results, "page": page}
+        return {"results": results, "page": page, "has_next_page": has_next_page}
 
     async def get_media_details(self, media_id: str) -> dict[str, Any]:
         """Get media details from database or fetch from provider."""

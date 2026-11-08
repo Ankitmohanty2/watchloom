@@ -41,7 +41,7 @@ export const mediaService = {
     const response = await api.get(`/api/v1/media/similar/${encodeURIComponent(provider)}/${providerId}`, {
       params: { media_type: mediaType, page },
     })
-    return response.data as { results: Media[]; page: number }
+    return response.data as { results: Media[]; page: number; has_next_page: boolean }
   },
 
   async getMediaDetails(mediaId: string): Promise<Media> {

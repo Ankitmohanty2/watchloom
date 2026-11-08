@@ -186,12 +186,15 @@ class AniListClient:
         data = await self._request(query, variables)
         return self._normalize_anime(data.get("Media", {}))
 
-    async def get_recommended_anime(self, anime_id: int, page: int = 1, per_page: int = 12) -> list[dict[str, Any]]:
+    async def get_recommended_anime(self, anime_id: int, page: int = 1, per_page: int = 12) -> dict[str, Any]:
         """Get AniList's community recommendations for an anime."""
         query = """
         query ($id: Int, $page: Int, $perPage: Int) {
           Media(id: $id, type: ANIME) {
             recommendations(page: $page, perPage: $perPage, sort: RATING_DESC) {
+              pageInfo {
+                hasNextPage
+              }
               nodes {
                 mediaRecommendation {
                   id
@@ -214,7 +217,10 @@ class AniListClient:
         """
         data = await self._request(query, {"id": anime_id, "page": page, "perPage": per_page})
         recommendations = (data.get("Media") or {}).get("recommendations") or {}
-        return recommendations.get("nodes", [])
+        return {
+            "results": recommendations.get("nodes", []),
+            "has_next_page": (recommendations.get("pageInfo") or {}).get("hasNextPage", False),
+        }
 
     async def get_trending_anime(self, page: int = 1, per_page: int = 20) -> dict[str, Any]:
         """Get trending anime."""

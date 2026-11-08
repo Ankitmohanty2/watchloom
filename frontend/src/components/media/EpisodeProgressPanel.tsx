@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, RotateCcw, Trash2, Tv } from 'lucide-react'
+import { Check, ChevronDown, RotateCcw, Trash2, Tv } from 'lucide-react'
 import { progressService } from '@/services/progressService'
 import type { Media } from '@/types'
 
@@ -19,10 +19,15 @@ interface EpisodeProgressPanelProps {
 export const EpisodeProgressPanel = ({ media }: EpisodeProgressPanelProps) => {
   const queryClient = useQueryClient()
   const [seasonNumber, setSeasonNumber] = useState(1)
+  const [seasonMenuOpen, setSeasonMenuOpen] = useState(false)
+  const [seasonMenuOpensUp, setSeasonMenuOpensUp] = useState(false)
   const [episodeNumber, setEpisodeNumber] = useState(1)
   const [selectionEdited, setSelectionEdited] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const seasonMenuRef = useRef<HTMLDivElement>(null)
+  const seasonTriggerRef = useRef<HTMLButtonElement>(null)
+  const seasonOptionRefs = useRef<Array<HTMLButtonElement | null>>([])
   const { data: progress, isLoading, isError } = useQuery({
     queryKey: ['progress', media.id],
     queryFn: () => progressService.getMediaProgress(media.id),
@@ -88,6 +93,40 @@ export const EpisodeProgressPanel = ({ media }: EpisodeProgressPanelProps) => {
   const savedSeasonCount = episodes.reduce((highest, episode) => Math.max(highest, episode.season_number), 0)
   const seasonCount = Math.max(1, Math.min(Math.max(media.season_count ?? 0, savedSeasonCount), 100))
 
+  const openSeasonMenu = () => {
+    const bounds = seasonTriggerRef.current?.getBoundingClientRect()
+    if (bounds) {
+      const availableBelow = window.innerHeight - bounds.bottom
+      const availableAbove = bounds.top
+      const menuHeight = Math.min(seasonCount * 40 + 12, 224)
+      setSeasonMenuOpensUp(availableBelow < menuHeight && availableAbove > availableBelow)
+    }
+    setSeasonMenuOpen(true)
+    requestAnimationFrame(() => {
+      seasonOptionRefs.current[seasonNumber - 1]?.focus()
+    })
+  }
+
+  const handleSeasonMenuKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      setSeasonMenuOpen(false)
+      seasonTriggerRef.current?.focus()
+    }
+  }
+
+  const handleSeasonOptionKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    let nextIndex: number | null = null
+    if (event.key === 'ArrowDown') nextIndex = (index + 1) % seasonCount
+    if (event.key === 'ArrowUp') nextIndex = (index + seasonCount - 1) % seasonCount
+    if (event.key === 'Home') nextIndex = 0
+    if (event.key === 'End') nextIndex = seasonCount - 1
+    if (nextIndex !== null) {
+      event.preventDefault()
+      seasonOptionRefs.current[nextIndex]?.focus()
+    }
+  }
+
   return (
     <section className="mt-4 rounded-2xl border border-border/10 bg-surface p-4" aria-labelledby="episode-progress-title">
       <div className="flex items-start gap-3">
@@ -106,18 +145,59 @@ export const EpisodeProgressPanel = ({ media }: EpisodeProgressPanelProps) => {
             <span>Season</span>
             {seasonCount > 1 && <span className="mt-0.5 truncate text-[10px] font-normal text-muted-foreground">{seasonCount} available</span>}
           </span>
-          <select
-            value={seasonNumber}
-            onChange={(event) => {
-              setSelectionEdited(true)
-              setSeasonNumber(Number(event.target.value))
+          <div
+            ref={seasonMenuRef}
+            className="relative mt-1.5"
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setSeasonMenuOpen(false)
             }}
-            className="mt-1.5 h-10 w-full rounded-xl border border-border/15 bg-background px-3 text-sm text-foreground outline-none focus:border-primary-500/60 focus:ring-4 focus:ring-primary-500/10"
+            onKeyDown={handleSeasonMenuKeyDown}
           >
-            {Array.from({ length: seasonCount }, (_, index) => index + 1).map((season) => (
-              <option key={season} value={season}>Season {season}</option>
-            ))}
-          </select>
+            <button
+              ref={seasonTriggerRef}
+              type="button"
+              aria-haspopup="listbox"
+              aria-expanded={seasonMenuOpen}
+              aria-controls={`season-options-${media.id}`}
+              onClick={() => seasonMenuOpen ? setSeasonMenuOpen(false) : openSeasonMenu()}
+              className="flex h-10 w-full items-center justify-between rounded-xl border border-border/15 bg-background px-3 text-left text-sm font-medium text-foreground outline-none transition hover:border-border/25 focus-visible:ring-2 focus-visible:ring-primary-500/60"
+            >
+              <span>Season {seasonNumber}</span>
+              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${seasonMenuOpen && !seasonMenuOpensUp ? 'rotate-180' : seasonMenuOpen ? 'rotate-0' : ''}`} aria-hidden="true" />
+            </button>
+            {seasonMenuOpen && (
+              <div
+                id={`season-options-${media.id}`}
+                role="listbox"
+                aria-label="Choose season"
+                className={`absolute inset-x-0 z-50 max-h-56 overflow-y-auto rounded-xl border border-border/15 bg-surface-alt p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.34)] ring-1 ring-black/5 ${seasonMenuOpensUp ? 'bottom-full mb-2' : 'top-full mt-2'}`}
+              >
+                {Array.from({ length: seasonCount }, (_, index) => index + 1).map((season, index) => {
+                  const isSelected = season === seasonNumber
+                  return (
+                    <button
+                      key={season}
+                      ref={(element) => { seasonOptionRefs.current[index] = element }}
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
+                      onKeyDown={(event) => handleSeasonOptionKeyDown(event, index)}
+                      onClick={() => {
+                        setSelectionEdited(true)
+                        setSeasonNumber(season)
+                        setSeasonMenuOpen(false)
+                        seasonTriggerRef.current?.focus()
+                      }}
+                      className={`flex min-h-9 w-full items-center justify-between rounded-lg px-3 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60 ${isSelected ? 'bg-primary-500/15 font-semibold text-foreground-strong' : 'text-foreground hover:bg-hover/[0.07]'}`}
+                    >
+                      Season {season}
+                      {isSelected && <Check className="h-4 w-4 text-primary-500" aria-hidden="true" />}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         </label>
         <label className="min-w-0 text-xs font-medium text-muted">
           <span className="flex min-h-8 items-end">Episode</span>
