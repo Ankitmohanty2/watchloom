@@ -100,11 +100,11 @@ export const EpisodeProgressPanel = ({ media }: EpisodeProgressPanelProps) => {
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <label className="text-xs font-medium text-muted">
-          <span className="flex items-center justify-between gap-2">
+      <div className="mt-4 grid min-w-0 grid-cols-2 gap-2.5">
+        <label className="min-w-0 text-xs font-medium text-muted">
+          <span className="flex min-h-8 flex-col justify-end">
             <span>Season</span>
-            <span className="text-[10px] font-normal text-muted-foreground">{seasonCount} {seasonCount === 1 ? 'season' : 'seasons'} available</span>
+            {seasonCount > 1 && <span className="mt-0.5 truncate text-[10px] font-normal text-muted-foreground">{seasonCount} available</span>}
           </span>
           <select
             value={seasonNumber}
@@ -119,8 +119,8 @@ export const EpisodeProgressPanel = ({ media }: EpisodeProgressPanelProps) => {
             ))}
           </select>
         </label>
-        <label className="text-xs font-medium text-muted">
-          Episode
+        <label className="min-w-0 text-xs font-medium text-muted">
+          <span className="flex min-h-8 items-end">Episode</span>
           <input
             type="number"
             min={1}

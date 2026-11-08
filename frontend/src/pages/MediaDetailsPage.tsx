@@ -148,8 +148,8 @@ const MediaDetailsPage = () => {
       </section>
 
       <div className="container-custom relative -mt-16 pb-20 sm:-mt-20">
-        <div className="grid gap-8 md:grid-cols-[220px_minmax(0,1fr)] lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-10">
-          <aside>
+        <div className="grid min-w-0 gap-8 md:grid-cols-[220px_minmax(0,1fr)] lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-10">
+          <aside className="min-w-0">
             <div className="aspect-[2/3] max-w-[260px] overflow-hidden rounded-xl border border-border/10 bg-surface-alt shadow-[0_18px_50px_rgba(0,0,0,0.4)]">
               {media.poster_path ? (
                 <img src={getPosterImageUrl(media.poster_path)} alt={`${media.title} poster`} decoding="async" className="h-full w-full object-cover" />
@@ -239,7 +239,7 @@ const MediaDetailsPage = () => {
             ))}
           </aside>
 
-          <article className="pt-1 md:pt-28">
+          <article className="min-w-0 pt-1 md:pt-28">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-accent-foreground">{getMediaTypeLabel(media)}</p>
             <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-foreground-strong sm:text-4xl lg:text-5xl">{media.title}</h1>
             {media.original_title && media.original_title !== media.title && (
@@ -274,7 +274,7 @@ const MediaDetailsPage = () => {
             </div>
 
             {media.synopsis && (
-              <section className="mt-9 max-w-3xl border-t border-border/[0.08] pt-6">
+              <section className="mt-9 min-w-0 w-full max-w-3xl border-t border-border/[0.08] pt-6">
                 <h2 className="font-display text-lg font-semibold text-foreground-strong">Overview</h2>
                 <MediaSynopsis synopsis={media.synopsis} />
               </section>

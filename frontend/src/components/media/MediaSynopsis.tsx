@@ -48,5 +48,5 @@ export const MediaSynopsis = ({ synopsis, className = 'mt-3 text-sm leading-7 te
     return Array.from(parsed.body.childNodes).map((node, index) => renderNode(node, `synopsis-${index}`))
   }, [synopsis])
 
-  return <div className={className}>{content}</div>
+  return <div className={`min-w-0 max-w-full break-words [overflow-wrap:anywhere] ${className}`}>{content}</div>
 }
