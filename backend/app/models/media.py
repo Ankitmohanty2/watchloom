@@ -39,6 +39,7 @@ class MediaModel:
             "poster_path": kwargs.get("poster_path"),
             "backdrop_path": kwargs.get("backdrop_path"),
             "release_date": kwargs.get("release_date"),
+            "format": kwargs.get("format"),
             "genres": kwargs.get("genres", []),
             "languages": MediaModel._string_values(
                 kwargs.get("languages", []), ("english_name", "name", "iso_639_1")
@@ -73,6 +74,7 @@ class MediaModel:
             "poster_path": media_doc.get("poster_path"),
             "backdrop_path": media_doc.get("backdrop_path"),
             "release_date": media_doc.get("release_date"),
+            "format": media_doc.get("format"),
             "genres": media_doc.get("genres", []),
             "languages": MediaModel._string_values(
                 media_doc.get("languages", []), ("english_name", "name", "iso_639_1")

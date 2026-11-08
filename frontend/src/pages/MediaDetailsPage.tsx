@@ -12,7 +12,7 @@ import { TrailerBackdrop } from '@/components/media/TrailerBackdrop'
 import { MediaCard } from '@/components/media/MediaCard'
 import { EpisodeProgressPanel } from '@/components/media/EpisodeProgressPanel'
 import { MediaSynopsis } from '@/components/media/MediaSynopsis'
-import { formatMediaRating } from '@/utils/media'
+import { formatMediaRating, getMediaTypeLabel, isEpisodeBasedMedia } from '@/utils/media'
 import { getPosterImageUrl } from '@/utils/mediaImages'
 import type { LibraryEntry } from '@/types'
 
@@ -229,7 +229,7 @@ const MediaDetailsPage = () => {
                 <span className="mt-1 block text-xs leading-5 text-muted">Sign in to keep track of this title.</span>
               </Link>
             )}
-            {media.media_type === 'tv' && (isAuthenticated ? (
+            {isEpisodeBasedMedia(media) && (isAuthenticated ? (
               <EpisodeProgressPanel media={media} />
             ) : (
               <Link to="/signin" className="mt-4 block rounded-2xl border border-border/10 bg-surface-alt p-4 transition hover:border-primary-500/35">
@@ -240,7 +240,7 @@ const MediaDetailsPage = () => {
           </aside>
 
           <article className="pt-1 md:pt-28">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-accent-foreground">{media.media_type === 'tv' ? 'Series' : media.media_type}</p>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-accent-foreground">{getMediaTypeLabel(media)}</p>
             <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-foreground-strong sm:text-4xl lg:text-5xl">{media.title}</h1>
             {media.original_title && media.original_title !== media.title && (
               <p className="mt-2 text-sm text-muted-foreground">{media.original_title}</p>

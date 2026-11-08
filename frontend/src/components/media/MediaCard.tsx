@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Star } from 'lucide-react'
 import type { LibraryEntry, Media } from '@/types'
-import { formatMediaRating } from '@/utils/media'
+import { formatMediaRating, getMediaTypeLabel } from '@/utils/media'
 import { getPosterImageUrl } from '@/utils/mediaImages'
 
 interface MediaCardProps {
@@ -47,7 +47,7 @@ export const MediaCard = ({ media, libraryStatus }: MediaCardProps) => {
           </span>
         )}
         <span className={`absolute left-2.5 rounded-md border border-border/15 bg-[#101218]/80 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/90 backdrop-blur-sm ${libraryStatus ? 'top-10' : 'top-2.5'}`}>
-          {media.media_type === 'tv' ? 'Series' : media.media_type}
+          {getMediaTypeLabel(media)}
         </span>
         {rating && (
           <span className="absolute right-2.5 top-2.5 inline-flex items-center gap-1 rounded-md border border-border/15 bg-[#101218]/85 px-2 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">

@@ -6,7 +6,7 @@ import { mediaService } from '@/services/mediaService'
 import { MediaCard } from '@/components/media/MediaCard'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import type { Media } from '@/types'
-import { formatMediaRating } from '@/utils/media'
+import { formatMediaRating, getMediaTypeLabel } from '@/utils/media'
 import { MediaSynopsis } from '@/components/media/MediaSynopsis'
 import { getBackdropImageUrl, getPosterImageUrl } from '@/utils/mediaImages'
 
@@ -205,7 +205,7 @@ const DiscoverPage = () => {
                               <div className="min-w-0 flex-1">
                                 <p className="truncate text-sm font-medium text-foreground-strong">{media.title}</p>
                                 <p className="mt-1 text-xs capitalize text-muted-foreground">
-                                  {media.media_type === 'tv' ? 'Series' : media.media_type}{year ? ` · ${year}` : ''}
+                                  {getMediaTypeLabel(media)}{year ? ` · ${year}` : ''}
                                 </p>
                               </div>
                               {rating && (
@@ -289,7 +289,7 @@ const DiscoverPage = () => {
                 <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted">
                   {featured.release_date && <span>{new Date(featured.release_date).getFullYear()}</span>}
                   {featured.release_date && <span className="h-1 w-1 rounded-full bg-slate-500" />}
-                  <span className="capitalize">{featured.media_type === 'tv' ? 'Series' : featured.media_type}</span>
+                  <span>{getMediaTypeLabel(featured)}</span>
                   {featuredRating && (
                     <span className="inline-flex items-center gap-1.5 border-l border-border/20 pl-3 text-foreground-strong">
                       <Star className="h-3.5 w-3.5 fill-primary-400 text-primary-400" />

@@ -5,7 +5,7 @@ import { ArrowRight, ArrowUpRight, Clock, Pause, Play, Star } from 'lucide-react
 import { mediaService } from '@/services/mediaService'
 import { TrailerButton } from '@/components/media/TrailerButton'
 import { MediaSynopsis } from '@/components/media/MediaSynopsis'
-import { formatMediaRating } from '@/utils/media'
+import { formatMediaRating, getMediaTypeLabel } from '@/utils/media'
 import { getBackdropImageUrl } from '@/utils/mediaImages'
 import { YoutubeBackgroundPlayer } from '@/components/media/YoutubeBackgroundPlayer'
 import { canAutoplayBackgroundVideo, getYoutubeVideoId } from '@/utils/youtube'
@@ -113,7 +113,7 @@ const HomePage = () => {
                 </span>
               )}
               {featured?.media_type && (
-                <span className="capitalize">{featured.media_type === 'tv' ? 'Series' : featured.media_type}</span>
+                <span>{getMediaTypeLabel(featured)}</span>
               )}
             </div>
             {featured?.synopsis ? (

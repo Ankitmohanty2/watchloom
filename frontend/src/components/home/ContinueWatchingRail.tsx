@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { progressService } from '@/services/progressService'
 import { useAuthStore } from '@/store/authStore'
 import { getPosterImageUrl } from '@/utils/mediaImages'
+import { getMediaTypeLabel } from '@/utils/media'
 
 export const ContinueWatchingRail = () => {
   const { isAuthenticated } = useAuthStore()
@@ -46,7 +47,7 @@ export const ContinueWatchingRail = () => {
                     {media.poster_path ? <img src={getPosterImageUrl(media.poster_path)} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /> : <div className="flex h-full items-center justify-center px-2 text-center text-[10px] text-muted">{media.title}</div>}
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col justify-center py-1">
-                    <span className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-muted">{media.media_type === 'tv' ? 'Series' : media.media_type}</span>
+                    <span className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-muted">{getMediaTypeLabel(media)}</span>
                     <h3 className="truncate font-display text-base font-semibold text-foreground-strong">{media.title}</h3>
                     <p className="mt-1.5 text-xs text-muted-foreground">Season {episode.season_number} · Episode {episode.episode_number}</p>
                     <p className="mt-3 inline-flex items-center gap-1.5 text-[11px] text-muted"><Clock3 className="h-3.5 w-3.5" /> {total_watched} {total_watched === 1 ? 'episode' : 'episodes'} tracked</p>

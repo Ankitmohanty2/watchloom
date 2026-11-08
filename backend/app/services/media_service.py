@@ -228,6 +228,7 @@ class MediaService:
             "poster_path": cover_image.get("large"),
             "backdrop_path": item.get("bannerImage"),
             "release_date": self.anilist._format_anilist_date(item.get("startDate")),
+            "format": item.get("format"),
             "rating": item.get("averageScore"),
             "trailer_url": self.anilist._get_trailer_url(item.get("trailer")),
             "genres": item.get("genres", []),

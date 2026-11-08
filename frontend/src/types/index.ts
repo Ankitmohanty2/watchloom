@@ -35,6 +35,7 @@ export interface Media {
   poster_path?: string
   backdrop_path?: string
   release_date?: string
+  format?: string
   genres: string[]
   languages?: string[]
   countries?: string[]

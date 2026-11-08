@@ -66,6 +66,7 @@ class AniListClient:
             "backdrop_path": anime.get("bannerImage"),
             "trailer_url": self._get_trailer_url(anime.get("trailer")),
             "release_date": self._format_anilist_date(anime.get("startDate")),
+            "format": anime.get("format"),
             "genres": anime.get("genres", []),
             "rating": anime.get("averageScore"),
             "episode_count": anime.get("episodes"),
@@ -113,6 +114,7 @@ class AniListClient:
                 day
               }
               genres
+              format
               averageScore
               episodes
               status
@@ -154,6 +156,7 @@ class AniListClient:
               day
             }
             genres
+            format
             averageScore
             episodes
             duration
@@ -198,6 +201,7 @@ class AniListClient:
                   bannerImage
                   startDate { year month day }
                   genres
+                  format
                   averageScore
                   episodes
                   status
@@ -244,6 +248,7 @@ class AniListClient:
                 day
               }
               genres
+              format
               averageScore
               episodes
               status
@@ -288,6 +293,7 @@ class AniListClient:
                 day
               }
               genres
+              format
               averageScore
               episodes
               status

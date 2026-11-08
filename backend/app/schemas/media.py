@@ -20,6 +20,7 @@ class MediaBase(BaseModel):
     poster_path: str | None = None
     backdrop_path: str | None = None
     release_date: str | None = None
+    format: str | None = None
     genres: list[str] = []
     languages: list[str] = []
     countries: list[str] = []
