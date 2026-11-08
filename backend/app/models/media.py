@@ -9,7 +9,7 @@ class MediaModel:
     @staticmethod
     def _string_values(values: Any, keys: tuple[str, ...]) -> list[str]:
         """Normalize provider strings and legacy provider objects for API responses."""
-        if not isinstance(values, (list, tuple)):
+        if not isinstance(values, list | tuple):
             return []
 
         normalized: list[str] = []

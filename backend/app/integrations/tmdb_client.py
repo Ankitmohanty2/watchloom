@@ -121,7 +121,7 @@ class TMDBClient:
             "countries": [
                 country.get("name") if isinstance(country, dict) else country
                 for country in tv.get("origin_country", [])
-                if isinstance(country, (str, dict))
+                if isinstance(country, str | dict)
             ],
             "rating": tv.get("vote_average"),
             "trailer_url": self._select_trailer_url((tv.get("videos") or {}).get("results", [])),
