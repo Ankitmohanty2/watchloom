@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
-import { ArrowUpRight, Clock3, LoaderCircle, Search, Sparkles, Star, X } from 'lucide-react'
+import { ArrowUpRight, Clock3, LoaderCircle, Search, Star, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { mediaService } from '@/services/mediaService'
 import { MediaCard } from '@/components/media/MediaCard'
@@ -99,28 +99,25 @@ const DiscoverPage = () => {
 
   return (
     <div className="relative isolate bg-background text-foreground">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_top,_rgba(184,243,75,0.14),_transparent_62%)]" />
-      <main className="container-custom relative pb-20 pt-10 sm:pt-14">
-        <div className="mb-8 flex flex-col gap-7 md:mb-10 md:flex-row md:items-end md:justify-between">
+      <main className="container-custom pb-20 pt-8 sm:pt-12">
+        <div className="mb-7 flex flex-col gap-5 border-b border-border/[0.08] pb-6 md:mb-8 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary-500">
-              <Sparkles className="h-3.5 w-3.5" />
+            <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary-500">
               <span>Your next watch starts here</span>
             </div>
-            <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground-strong sm:text-4xl">
+            <h1 className="font-display text-3xl font-semibold tracking-[-0.035em] text-foreground-strong sm:text-[2.5rem]">
               Discover something great.
             </h1>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
+            <p className="mt-1.5 max-w-xl text-sm leading-6 text-muted-foreground sm:text-[15px]">
               Find your next film, series, or anime to fall into.
             </p>
           </div>
-          <div className="hidden items-center gap-2 text-xs text-muted-foreground md:flex">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            Movies · series · anime
+          <div className="text-xs text-muted-foreground md:pb-1">
+            Films <span className="px-1.5 text-border">/</span> Series <span className="px-1.5 text-border">/</span> Anime
           </div>
         </div>
 
-        <section aria-label="Search and browse media" className="mb-9 rounded-2xl border border-border/[0.08] bg-surface/90 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.18)] sm:p-4">
+        <section aria-label="Search and browse media" className="mb-8 border-b border-border/[0.08] pb-5">
           <form
             onSubmit={handleSearch}
             onFocus={() => setIsSearchFocused(true)}
@@ -145,7 +142,7 @@ const DiscoverPage = () => {
               onKeyDown={(event) => {
                 if (event.key === 'Escape') setIsSearchFocused(false)
               }}
-              className="h-12 w-full rounded-xl border border-border/[0.08] bg-background pl-11 pr-24 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary-500/50 focus:ring-2 focus:ring-primary-500/10 sm:h-[52px]"
+              className="h-12 w-full rounded-lg border border-border/[0.12] bg-surface/50 pl-11 pr-24 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary-500/50 focus:bg-surface focus:ring-2 focus:ring-primary-500/10 sm:h-[52px]"
             />
             {searchQuery && (
               <button
@@ -245,8 +242,8 @@ const DiscoverPage = () => {
                   onClick={() => setMediaType(filter.value)}
                   className={`whitespace-nowrap rounded-lg px-3.5 py-2 text-[13px] font-medium transition-colors ${
                     selected
-                      ? 'bg-hover/[0.09] text-foreground-strong'
-                      : 'text-muted-foreground hover:bg-hover/[0.04] hover:text-foreground-strong'
+                    ? 'bg-hover/[0.08] text-foreground-strong'
+                      : 'text-muted-foreground hover:text-foreground-strong'
                   }`}
                 >
                   {filter.label}
@@ -350,6 +347,23 @@ const DiscoverPage = () => {
                   {activeSearch ? 'That’s the only match for now. Try another title or switch category.' : 'More titles are on the way.'}
                 </div>
               )}
+              {isFetchingNextPage && (
+                <div className="mt-8" role="status" aria-live="polite">
+                  <div className="mb-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                    <LoadingSpinner size="sm" className="border-primary-500/25 border-t-primary-500" />
+                    <span>Finding more titles</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-5 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" aria-hidden="true">
+                    {Array.from({ length: 6 }, (_, index) => (
+                      <div key={index} className="animate-pulse">
+                        <div className="aspect-[2/3] rounded-xl bg-surface-hover" />
+                        <div className="mt-3 h-3 w-3/4 rounded bg-surface-hover" />
+                        <div className="mt-2 h-2.5 w-1/2 rounded bg-surface-hover/70" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               {hasNextPage && (
                 <div className="mt-9 flex flex-col items-center gap-3">
                   <button
@@ -359,7 +373,7 @@ const DiscoverPage = () => {
                     className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border/15 bg-surface px-5 py-2.5 text-sm font-semibold text-foreground-strong transition hover:bg-hover/[0.06] disabled:cursor-wait disabled:opacity-60"
                   >
                     {isFetchingNextPage ? (
-                      <><LoaderCircle className="h-4 w-4 animate-spin" /> Loading more</>
+                      <><LoadingSpinner size="sm" className="border-primary-500/25 border-t-primary-500" /> Loading titles</>
                     ) : (
                       <>{isFetchNextPageError ? 'Retry loading titles' : 'Load more titles'} <ArrowUpRight className="h-4 w-4" /></>
                     )}
