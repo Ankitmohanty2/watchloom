@@ -275,8 +275,9 @@ const DiscoverPage = () => {
               <ArrowUpRight className="h-4 w-4" /> Retry
             </button>
           </div>
-        ) : featured ? (
+        ) : items.length > 0 ? (
           <>
+            {featured && (
             <section aria-label="Featured title" className="discover-featured group relative mb-10 min-h-[340px] overflow-hidden rounded-[1.75rem] border border-border/[0.08] bg-surface-hover sm:min-h-[390px]">
               {featured.backdrop_path || featured.poster_path ? (
                 <img
@@ -331,6 +332,7 @@ const DiscoverPage = () => {
                 </Link>
               </div>
             </section>
+            )}
 
             <section ref={browseSectionRef} aria-label="Browse titles" className="scroll-mt-28">
               <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
