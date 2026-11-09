@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
-import { Star } from 'lucide-react'
+import { Clock3, Star } from 'lucide-react'
 import type { LibraryEntry, Media } from '@/types'
-import { formatMediaRating, getMediaTypeLabel } from '@/utils/media'
+import { formatMediaRating, getMediaRuntimeLabel, getMediaTypeLabel, isEpisodeBasedMedia } from '@/utils/media'
 import { getPosterImageUrl } from '@/utils/mediaImages'
 
 interface MediaCardProps {
@@ -23,6 +23,7 @@ export const MediaCard = ({ media, libraryStatus }: MediaCardProps) => {
     : `/media/fetch?provider=${media.provider}&id=${media.provider_id}&type=${media.media_type}`
 
   const rating = formatMediaRating(media.rating, media.media_type)
+  const runtime = getMediaRuntimeLabel(media)
 
   return (
     <Link to={linkTo} className="group block min-w-0">
@@ -63,7 +64,12 @@ export const MediaCard = ({ media, libraryStatus }: MediaCardProps) => {
         <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
           {media.release_date && <span>{new Date(media.release_date).getFullYear()}</span>}
           {media.release_date && media.genres?.[0] && <span className="h-0.5 w-0.5 rounded-full bg-slate-600" />}
-          {media.genres?.[0] && <span className="truncate">{media.genres[0]}</span>}
+          {media.genres?.[0] && <span className="max-w-24 truncate">{media.genres[0]}</span>}
+          {runtime && (
+            <span className="inline-flex shrink-0 items-center gap-1" title={isEpisodeBasedMedia(media) ? 'Runtime per episode' : 'Runtime'}>
+              <Clock3 className="h-3 w-3" aria-hidden="true" />{runtime}
+            </span>
+          )}
         </div>
       </div>
     </Link>

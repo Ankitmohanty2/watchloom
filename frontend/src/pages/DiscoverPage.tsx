@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
-import { ArrowUpRight, LoaderCircle, Search, Sparkles, Star, X } from 'lucide-react'
+import { ArrowUpRight, Clock3, LoaderCircle, Search, Sparkles, Star, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { mediaService } from '@/services/mediaService'
 import { MediaCard } from '@/components/media/MediaCard'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import type { Media } from '@/types'
-import { formatMediaRating, getMediaTypeLabel } from '@/utils/media'
+import { formatMediaRating, getMediaRuntimeLabel, getMediaTypeLabel } from '@/utils/media'
 import { MediaSynopsis } from '@/components/media/MediaSynopsis'
 import { getBackdropImageUrl, getPosterImageUrl } from '@/utils/mediaImages'
 
@@ -94,6 +94,7 @@ const DiscoverPage = () => {
   const { hasNextPage, fetchNextPage, isFetchingNextPage, isFetchNextPageError } = resultsQuery
   const featured = items[0]
   const featuredRating = formatMediaRating(featured?.rating, featured?.media_type)
+  const featuredRuntime = featured ? getMediaRuntimeLabel(featured) : null
   const remainingItems = items.slice(featured ? 1 : 0)
 
   return (
@@ -274,7 +275,7 @@ const DiscoverPage = () => {
                 <img
                   src={getBackdropImageUrl(featured.backdrop_path || featured.poster_path)}
                   alt=""
-                  className="discover-featured-image absolute inset-0 h-full w-full object-cover object-center opacity-65 transition-transform duration-700 group-hover:scale-[1.015]"
+                  className="discover-featured-image absolute inset-0 h-full w-full object-cover object-center opacity-80 transition-transform duration-700 group-hover:scale-[1.015]"
                 />
               ) : null}
               <div className="discover-featured-overlay absolute inset-0" />
@@ -290,6 +291,11 @@ const DiscoverPage = () => {
                   {featured.release_date && <span>{new Date(featured.release_date).getFullYear()}</span>}
                   {featured.release_date && <span className="h-1 w-1 rounded-full bg-slate-500" />}
                   <span>{getMediaTypeLabel(featured)}</span>
+                  {featuredRuntime && (
+                    <span className="inline-flex items-center gap-1.5 border-l border-border/20 pl-3">
+                      <Clock3 className="h-3.5 w-3.5 text-muted-foreground" />{featuredRuntime}
+                    </span>
+                  )}
                   {featuredRating && (
                     <span className="inline-flex items-center gap-1.5 border-l border-border/20 pl-3 text-foreground-strong">
                       <Star className="h-3.5 w-3.5 fill-primary-400 text-primary-400" />
@@ -330,7 +336,7 @@ const DiscoverPage = () => {
                   </h2>
                 </div>
                 {remainingItems.length > 0 && (
-                  <span className="text-xs text-muted-foreground">{remainingItems.length} titles</span>
+                  <span className="text-xs text-muted-foreground">{items.length} titles</span>
                 )}
               </div>
               {remainingItems.length > 0 ? (

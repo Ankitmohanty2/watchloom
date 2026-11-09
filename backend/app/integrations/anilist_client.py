@@ -69,6 +69,7 @@ class AniListClient:
             "format": anime.get("format"),
             "genres": anime.get("genres", []),
             "rating": anime.get("averageScore"),
+            "runtime": anime.get("duration"),
             "episode_count": anime.get("episodes"),
             "status": anime.get("status"),
         }
@@ -117,6 +118,7 @@ class AniListClient:
               format
               averageScore
               episodes
+              duration
               status
             }
           }
@@ -207,6 +209,7 @@ class AniListClient:
                   format
                   averageScore
                   episodes
+                  duration
                   status
                   trailer { id site }
                 }
@@ -257,6 +260,7 @@ class AniListClient:
               format
               averageScore
               episodes
+              duration
               status
             }
           }
@@ -302,6 +306,7 @@ class AniListClient:
               format
               averageScore
               episodes
+              duration
               status
             }
           }

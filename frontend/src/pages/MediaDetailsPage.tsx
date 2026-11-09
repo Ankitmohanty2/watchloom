@@ -12,7 +12,7 @@ import { TrailerBackdrop } from '@/components/media/TrailerBackdrop'
 import { MediaCard } from '@/components/media/MediaCard'
 import { EpisodeProgressPanel } from '@/components/media/EpisodeProgressPanel'
 import { MediaSynopsis } from '@/components/media/MediaSynopsis'
-import { formatMediaRating, getMediaTypeLabel, isEpisodeBasedMedia } from '@/utils/media'
+import { formatMediaRating, getMediaRuntimeLabel, getMediaTypeLabel, isEpisodeBasedMedia } from '@/utils/media'
 import { getPosterImageUrl } from '@/utils/mediaImages'
 import type { LibraryEntry } from '@/types'
 
@@ -135,6 +135,7 @@ const MediaDetailsPage = () => {
   }
 
   const rating = formatMediaRating(media.rating, media.media_type)
+  const runtimeLabel = getMediaRuntimeLabel(media)
   const backdrop = media.backdrop_path || media.poster_path
   const mutationError = (addMutation.error as any)?.response?.data?.detail || 'Could not add this title. Please try again.'
 
@@ -258,7 +259,7 @@ const MediaDetailsPage = () => {
             <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-muted">
               {rating && <span className="inline-flex items-center gap-1.5 font-semibold text-foreground-strong"><Star className="h-4 w-4 fill-primary-500 text-primary-600" />{rating}</span>}
               {media.release_date && <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-4 w-4 text-muted-foreground" />{new Date(media.release_date).getFullYear()}</span>}
-              {media.runtime && <span className="inline-flex items-center gap-1.5"><Clock3 className="h-4 w-4 text-muted-foreground" />{media.runtime} min</span>}
+              {runtimeLabel && <span className="inline-flex items-center gap-1.5"><Clock3 className="h-4 w-4 text-muted-foreground" />{runtimeLabel}{isEpisodeBasedMedia(media) && <span className="sr-only"> per episode</span>}</span>}
               {media.season_count && <span>{media.season_count} {media.season_count === 1 ? 'season' : 'seasons'}</span>}
               {media.episode_count && <span>{media.episode_count} episodes</span>}
             </div>

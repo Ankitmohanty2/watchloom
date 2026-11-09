@@ -124,6 +124,7 @@ class TMDBClient:
                 if isinstance(country, str | dict)
             ],
             "rating": tv.get("vote_average"),
+            "runtime": next(iter(tv.get("episode_run_time") or []), None),
             "trailer_url": self._select_trailer_url((tv.get("videos") or {}).get("results", [])),
             "season_count": tv.get("number_of_seasons"),
             "episode_count": tv.get("number_of_episodes"),

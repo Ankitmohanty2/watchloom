@@ -217,6 +217,7 @@ class MediaService:
             "backdrop_path": self.tmdb._get_image_url(item.get("backdrop_path"), "original"),
             "release_date": item.get("release_date") or item.get("first_air_date"),
             "rating": item.get("vote_average"),
+            "runtime": item.get("runtime") or next(iter(item.get("episode_run_time") or []), None),
         }
 
     def _normalize_anilist_result(self, item: dict[str, Any]) -> dict[str, Any]:
@@ -235,6 +236,7 @@ class MediaService:
             "release_date": self.anilist._format_anilist_date(item.get("startDate")),
             "format": item.get("format"),
             "rating": item.get("averageScore"),
+            "runtime": item.get("duration"),
             "trailer_url": self.anilist._get_trailer_url(item.get("trailer")),
             "genres": item.get("genres", []),
             "episode_count": item.get("episodes"),

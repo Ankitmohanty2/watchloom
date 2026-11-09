@@ -152,8 +152,8 @@
 
 .discover-featured-overlay {
   background:
-    linear-gradient(90deg, rgb(var(--background-rgb) / 0.96) 0%, rgb(var(--background-rgb) / 0.86) 40%, rgb(var(--background-rgb) / 0.34) 100%),
-    linear-gradient(0deg, rgb(var(--background-rgb) / 0.7), transparent 68%);
+    linear-gradient(90deg, rgb(var(--background-rgb) / 0.88) 0%, rgb(var(--background-rgb) / 0.72) 36%, rgb(var(--background-rgb) / 0.28) 75%, rgb(var(--background-rgb) / 0.1) 100%),
+    linear-gradient(0deg, rgb(var(--background-rgb) / 0.72), transparent 68%);
 }
 
 .home-hero-image {
@@ -211,7 +211,7 @@ html.dark .home-hero-overlay-left {
 html[data-theme='dark'] .discover-featured-overlay,
 html.dark .discover-featured-overlay {
   background:
-    linear-gradient(90deg, rgb(var(--background-rgb) / 0.96) 0%, rgb(var(--background-rgb) / 0.84) 40%, rgb(var(--background-rgb) / 0.34) 100%),
+    linear-gradient(90deg, rgb(var(--background-rgb) / 0.86) 0%, rgb(var(--background-rgb) / 0.7) 36%, rgb(var(--background-rgb) / 0.3) 75%, rgb(var(--background-rgb) / 0.12) 100%),
     linear-gradient(0deg, rgb(var(--background-rgb) / 0.74), transparent 68%);
 }
 
