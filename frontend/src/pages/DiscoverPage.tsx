@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
-import { ArrowUpRight, Clock3, LoaderCircle, Search, Star, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { ArrowLeft, ArrowRight, ArrowUpRight, Clock3, LoaderCircle, Search, Star, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { mediaService } from '@/services/mediaService'
 import { MediaCard } from '@/components/media/MediaCard'
@@ -27,26 +27,26 @@ const DiscoverPage = () => {
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
   const [mediaType, setMediaType] = useState('')
+  const [page, setPage] = useState(1)
+  const browseSectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     const timeout = window.setTimeout(() => setDebouncedQuery(searchQuery.trim()), 300)
     return () => window.clearTimeout(timeout)
   }, [searchQuery])
 
-  const trending = useInfiniteQuery({
-    queryKey: ['discover', 'trending', mediaType || 'all'],
-    initialPageParam: 1,
-    queryFn: ({ pageParam }) => mediaService.getTrending(mediaType || 'all', pageParam),
-    getNextPageParam: (lastPage) => lastPage.has_next_page ? lastPage.page + 1 : undefined,
+  const trending = useQuery({
+    queryKey: ['discover', 'trending', mediaType || 'all', page],
+    queryFn: () => mediaService.getTrending(mediaType || 'all', page),
     enabled: !activeSearch,
+    placeholderData: keepPreviousData,
   })
 
-  const searchResults = useInfiniteQuery({
-    queryKey: ['discover', 'search-results', activeSearch, mediaType],
-    initialPageParam: 1,
-    queryFn: ({ pageParam }) => mediaService.search(activeSearch, mediaType || undefined, pageParam),
-    getNextPageParam: (lastPage) => lastPage.has_next_page ? lastPage.page + 1 : undefined,
+  const searchResults = useQuery({
+    queryKey: ['discover', 'search-results', activeSearch, mediaType, page],
+    queryFn: () => mediaService.search(activeSearch, mediaType || undefined, page),
     enabled: !!activeSearch,
+    placeholderData: keepPreviousData,
   })
 
   const {
@@ -64,6 +64,7 @@ const DiscoverPage = () => {
 
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault()
+    setPage(1)
     setActiveSearch(searchQuery.trim())
     setIsSearchFocused(false)
   }
@@ -72,6 +73,13 @@ const DiscoverPage = () => {
     setSearchQuery('')
     setActiveSearch('')
     setDebouncedQuery('')
+    setPage(1)
+  }
+
+  const navigateToPage = (nextPage: number) => {
+    if (nextPage < 1 || nextPage === page) return
+    setPage(nextPage)
+    window.requestAnimationFrame(() => browseSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }
 
   const normalizedSearch = searchQuery.trim()
@@ -79,20 +87,21 @@ const DiscoverPage = () => {
   const suggestions = (suggestionData?.results ?? []).slice(0, 6) as Media[]
 
   const resultsQuery = activeSearch ? searchResults : trending
-  const responsePages = resultsQuery.data?.pages
+  const responsePage = resultsQuery.data
   const items: Media[] = useMemo(() => {
     const seen = new Set<string>()
-    return (responsePages ?? []).flatMap((page) => page.results).filter((media) => {
+    return (responsePage?.results ?? []).filter((media) => {
       const key = `${media.provider}:${media.provider_id}`
       if (seen.has(key)) return false
       seen.add(key)
       return true
     })
-  }, [responsePages])
+  }, [responsePage])
   const isLoading = resultsQuery.isLoading
-  const isError = resultsQuery.isError
-  const { hasNextPage, fetchNextPage, isFetchingNextPage, isFetchNextPageError } = resultsQuery
-  const featured = items[0]
+  const isError = resultsQuery.isError && !responsePage
+  const hasNextPage = responsePage?.has_next_page ?? false
+  const isChangingPage = resultsQuery.isFetching && resultsQuery.isPlaceholderData && !resultsQuery.isError
+  const featured = page === 1 ? items[0] : undefined
   const featuredRating = formatMediaRating(featured?.rating, featured?.media_type)
   const featuredRuntime = featured ? getMediaRuntimeLabel(featured) : null
   const remainingItems = items.slice(featured ? 1 : 0)
@@ -138,6 +147,7 @@ const DiscoverPage = () => {
               onChange={(event) => {
                 setSearchQuery(event.target.value)
                 setActiveSearch('')
+                setPage(1)
               }}
               onKeyDown={(event) => {
                 if (event.key === 'Escape') setIsSearchFocused(false)
@@ -239,7 +249,7 @@ const DiscoverPage = () => {
                   key={filter.value || 'all'}
                   type="button"
                   aria-pressed={selected}
-                  onClick={() => setMediaType(filter.value)}
+                  onClick={() => { setMediaType(filter.value); setPage(1) }}
                   className={`whitespace-nowrap rounded-lg px-3.5 py-2 text-[13px] font-medium transition-colors ${
                     selected
                     ? 'bg-hover/[0.08] text-foreground-strong'
@@ -322,7 +332,7 @@ const DiscoverPage = () => {
               </div>
             </section>
 
-            <section aria-label="Browse titles">
+            <section ref={browseSectionRef} aria-label="Browse titles" className="scroll-mt-28">
               <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
                 <div>
                   <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -333,11 +343,20 @@ const DiscoverPage = () => {
                   </h2>
                 </div>
                 {remainingItems.length > 0 && (
-                  <span className="text-xs text-muted-foreground">{items.length} titles</span>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    {isChangingPage && <span className="inline-flex items-center gap-2" role="status"><LoadingSpinner size="sm" className="border-primary-500/25 border-t-primary-500" /> Loading page {page}</span>}
+                    <span>{items.length} titles on this page</span>
+                  </div>
                 )}
               </div>
+              {resultsQuery.isError && responsePage && (
+                <div role="alert" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-500/20 bg-red-500/[0.04] px-4 py-3 text-sm">
+                  <span className="text-muted-foreground">Page {page} didn’t load. Your current titles are still here.</span>
+                  <button type="button" onClick={() => { void resultsQuery.refetch() }} className="font-medium text-foreground-strong underline decoration-border underline-offset-4 hover:decoration-current">Retry</button>
+                </div>
+              )}
               {remainingItems.length > 0 ? (
-                <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-5 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                <div aria-busy={isChangingPage} className={`grid grid-cols-2 gap-x-4 gap-y-7 transition-opacity duration-200 sm:grid-cols-3 sm:gap-x-5 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 ${isChangingPage ? 'pointer-events-none opacity-45' : ''}`}>
                   {remainingItems.map((media) => (
                     <MediaCard key={`${media.provider}-${media.provider_id}`} media={media} />
                   ))}
@@ -347,39 +366,48 @@ const DiscoverPage = () => {
                   {activeSearch ? 'That’s the only match for now. Try another title or switch category.' : 'More titles are on the way.'}
                 </div>
               )}
-              {isFetchingNextPage && (
-                <div className="mt-8" role="status" aria-live="polite">
-                  <div className="mb-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                    <LoadingSpinner size="sm" className="border-primary-500/25 border-t-primary-500" />
-                    <span>Finding more titles</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-5 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" aria-hidden="true">
-                    {Array.from({ length: 6 }, (_, index) => (
-                      <div key={index} className="animate-pulse">
-                        <div className="aspect-[2/3] rounded-xl bg-surface-hover" />
-                        <div className="mt-3 h-3 w-3/4 rounded bg-surface-hover" />
-                        <div className="mt-2 h-2.5 w-1/2 rounded bg-surface-hover/70" />
-                      </div>
+              {(page > 1 || hasNextPage) && (
+                <nav aria-label="Discover result pages" className="mt-10 flex flex-col items-center gap-3 border-t border-border/[0.08] pt-6">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => navigateToPage(page - 1)}
+                      disabled={page === 1 || isChangingPage}
+                      aria-label="Previous page"
+                      className="inline-flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium text-muted-foreground transition hover:bg-hover/[0.06] hover:text-foreground-strong disabled:pointer-events-none disabled:opacity-35"
+                    >
+                      <ArrowLeft className="h-4 w-4" /><span className="hidden sm:inline">Previous</span>
+                    </button>
+                    {page > 3 && <>
+                      <button type="button" onClick={() => navigateToPage(1)} disabled={isChangingPage} className="h-10 min-w-10 rounded-lg px-3 text-sm text-muted-foreground transition hover:bg-hover/[0.06] hover:text-foreground-strong disabled:opacity-50">1</button>
+                      <span aria-hidden="true" className="px-1 text-muted-foreground/60">…</span>
+                    </>}
+                    {Array.from({ length: Math.min(3, page) }, (_, index) => page - Math.min(2, page - 1) + index).map((pageNumber) => (
+                      <button
+                        key={pageNumber}
+                        type="button"
+                        onClick={() => navigateToPage(pageNumber)}
+                        disabled={isChangingPage}
+                        aria-current={pageNumber === page ? 'page' : undefined}
+                        className={`h-10 min-w-10 rounded-lg px-3 text-sm font-medium transition disabled:opacity-50 ${pageNumber === page ? 'bg-primary-500 text-[#11150d]' : 'text-muted-foreground hover:bg-hover/[0.06] hover:text-foreground-strong'}`}
+                      >
+                        {pageNumber}
+                      </button>
                     ))}
-                  </div>
-                </div>
-              )}
-              {hasNextPage && (
-                <div className="mt-9 flex flex-col items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => { void fetchNextPage() }}
-                    disabled={isFetchingNextPage}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border/15 bg-surface px-5 py-2.5 text-sm font-semibold text-foreground-strong transition hover:bg-hover/[0.06] disabled:cursor-wait disabled:opacity-60"
-                  >
-                    {isFetchingNextPage ? (
-                      <><LoadingSpinner size="sm" className="border-primary-500/25 border-t-primary-500" /> Loading titles</>
-                    ) : (
-                      <>{isFetchNextPageError ? 'Retry loading titles' : 'Load more titles'} <ArrowUpRight className="h-4 w-4" /></>
+                    {hasNextPage && (
+                      <button
+                        type="button"
+                        onClick={() => navigateToPage(page + 1)}
+                        disabled={isChangingPage}
+                        aria-label="Next page"
+                        className="inline-flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium text-muted-foreground transition hover:bg-hover/[0.06] hover:text-foreground-strong disabled:pointer-events-none disabled:opacity-35"
+                      >
+                        <span className="hidden sm:inline">Next</span><ArrowRight className="h-4 w-4" />
+                      </button>
                     )}
-                  </button>
-                  <p className="text-xs text-muted-foreground">{items.length} titles loaded so far</p>
-                </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Page {page}{hasNextPage ? '' : ' · End of results'}</p>
+                </nav>
               )}
             </section>
           </>
