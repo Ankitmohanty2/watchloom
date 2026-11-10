@@ -6,14 +6,14 @@ import { ArrowRight, LoaderCircle, RefreshCw } from 'lucide-react'
 import { mediaService } from '@/services/mediaService'
 import { MediaCard } from '@/components/media/MediaCard'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
-import type { Media } from '@/types'
+import type { Media, MovieCollection } from '@/types'
 
 interface MediaCollectionPageProps {
   mediaType: 'movie' | 'tv' | 'anime'
   title: string
   eyebrow: string
   description: string
-  collection?: 'popular' | 'bollywood'
+  collection?: MovieCollection
   toolbar?: ReactNode
 }
 

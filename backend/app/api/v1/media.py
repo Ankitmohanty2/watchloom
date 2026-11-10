@@ -1,11 +1,10 @@
 """Media API routes."""
 
-from typing import Literal
-
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.core.exceptions import ExternalAPIError
 from app.db.mongodb import get_database
+from app.schemas.media import MovieCollection
 from app.services.media_service import MediaService
 
 router = APIRouter(prefix="/media", tags=["Media"])
@@ -46,16 +45,16 @@ async def get_trending(
 async def get_popular(
     media_type: str = Query(...),
     page: int = Query(1, ge=1),
-    collection: Literal["popular", "bollywood"] = Query("popular"),
+    collection: MovieCollection = Query("popular"),
     db=Depends(get_database),
 ):
     """Get popular media by type."""
     try:
         media_service = MediaService(db)
-        if collection == "bollywood" and media_type != "movie":
+        if collection != "popular" and media_type != "movie":
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="The Bollywood collection is only available for movies.",
+                detail="Regional and streaming collections are only available for movies.",
             )
         results = await media_service.get_popular(media_type, page, collection)
         return results

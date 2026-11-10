@@ -55,6 +55,19 @@ export interface MediaPage {
   has_next_page: boolean
 }
 
+export type MovieCollection =
+  | 'popular'
+  | 'top_rated'
+  | 'hollywood'
+  | 'bollywood'
+  | 'tollywood'
+  | 'malayalam'
+  | 'tamil'
+  | 'kannada'
+  | 'bengali'
+  | 'marathi'
+  | 'ott'
+
 export interface LibraryEntry {
   id: string
   user_id: string

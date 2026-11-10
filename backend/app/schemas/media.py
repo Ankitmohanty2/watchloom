@@ -1,6 +1,22 @@
 """Media Pydantic schemas."""
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
+
+MovieCollection = Literal[
+    "popular",
+    "top_rated",
+    "hollywood",
+    "bollywood",
+    "tollywood",
+    "malayalam",
+    "tamil",
+    "kannada",
+    "bengali",
+    "marathi",
+    "ott",
+]
 
 
 class ProviderIds(BaseModel):

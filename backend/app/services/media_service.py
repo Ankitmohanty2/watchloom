@@ -7,6 +7,24 @@ from app.integrations.anilist_client import anilist_client
 from app.integrations.tmdb_client import tmdb_client
 from app.models.media import MediaModel
 from app.repositories.media_repository import MediaRepository
+from app.schemas.media import MovieCollection
+
+MOVIE_COLLECTION_FILTERS: dict[str, dict[str, str]] = {
+    "top_rated": {"sort_by": "vote_average.desc", "vote_count.gte": "100"},
+    "hollywood": {"with_origin_country": "US", "with_original_language": "en"},
+    "bollywood": {"with_origin_country": "IN", "with_original_language": "hi"},
+    "tollywood": {"with_origin_country": "IN", "with_original_language": "te"},
+    "malayalam": {"with_origin_country": "IN", "with_original_language": "ml"},
+    "tamil": {"with_origin_country": "IN", "with_original_language": "ta"},
+    "kannada": {"with_origin_country": "IN", "with_original_language": "kn"},
+    "bengali": {"with_origin_country": "IN", "with_original_language": "bn"},
+    "marathi": {"with_origin_country": "IN", "with_original_language": "mr"},
+    "ott": {
+        "watch_region": "IN",
+        "with_watch_monetization_types": "flatrate",
+        "vote_count.gte": "20",
+    },
+}
 
 
 class MediaService:
@@ -78,20 +96,19 @@ class MediaService:
         return {"results": results, "page": page, "has_next_page": has_next_page}
 
     async def get_popular(
-        self, media_type: str, page: int = 1, collection: str = "popular"
+        self, media_type: str, page: int = 1, collection: MovieCollection = "popular"
     ) -> dict[str, Any]:
         """Get popular media by type."""
         results = []
         has_next_page = False
 
         if media_type == "movie":
-            if collection == "bollywood":
+            if collection in MOVIE_COLLECTION_FILTERS:
                 tmdb_results = await self.tmdb.discover_movie(
                     {
                         "include_adult": "false",
                         "sort_by": "popularity.desc",
-                        "with_origin_country": "IN",
-                        "with_original_language": "hi",
+                        **MOVIE_COLLECTION_FILTERS[collection],
                         "page": page,
                     }
                 )
