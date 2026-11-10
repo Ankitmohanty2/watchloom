@@ -166,6 +166,10 @@ class TMDBClient:
         """Get popular movies."""
         return await self._request("movie/popular", {"page": page})
 
+    async def get_movie_watch_providers(self, region: str = "IN") -> dict[str, Any]:
+        """Get streaming services currently listed for a region."""
+        return await self._request("watch/providers/movie", {"watch_region": region})
+
     async def get_popular_tv(self, page: int = 1) -> dict[str, Any]:
         """Get popular TV shows."""
         return await self._request("tv/popular", {"page": page})

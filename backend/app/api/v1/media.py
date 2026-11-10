@@ -46,6 +46,8 @@ async def get_popular(
     media_type: str = Query(...),
     page: int = Query(1, ge=1),
     collection: MovieCollection = Query("popular"),
+    provider_id: int | None = Query(None, ge=1),
+    region: str = Query("IN", pattern="^(IN|US)$"),
     db=Depends(get_database),
 ):
     """Get popular media by type."""
@@ -56,8 +58,26 @@ async def get_popular(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="Regional and streaming collections are only available for movies.",
             )
-        results = await media_service.get_popular(media_type, page, collection)
+        if provider_id is not None and collection != "ott":
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="A provider can only be selected for the OTT collection.",
+            )
+        results = await media_service.get_popular(media_type, page, collection, provider_id, region)
         return results
+    except ExternalAPIError as e:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(e)) from e
+
+
+@router.get("/watch/providers")
+async def get_movie_watch_providers(
+    region: str = Query("IN", pattern="^(IN|US)$"),
+    db=Depends(get_database),
+):
+    """Get streaming providers available in a supported region."""
+    try:
+        media_service = MediaService(db)
+        return {"results": await media_service.get_movie_watch_providers(region)}
     except ExternalAPIError as e:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(e)) from e
 

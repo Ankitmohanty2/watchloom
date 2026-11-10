@@ -1,5 +1,5 @@
 import api from './api'
-import type { Media, MediaPage, MovieCollection } from '@/types'
+import type { Media, MediaPage, MovieCollection, WatchProvider } from '@/types'
 
 export const mediaService = {
   async search(query: string, mediaType?: string, page = 1): Promise<MediaPage> {
@@ -16,11 +16,22 @@ export const mediaService = {
     return response.data as MediaPage
   },
 
-  async getPopular(mediaType: string, page = 1, collection: MovieCollection = 'popular'): Promise<MediaPage> {
+  async getPopular(
+    mediaType: string,
+    page = 1,
+    collection: MovieCollection = 'popular',
+    providerId?: number,
+    region = 'IN',
+  ): Promise<MediaPage> {
     const response = await api.get('/api/v1/media/popular', {
-      params: { media_type: mediaType, page, collection },
+      params: { media_type: mediaType, page, collection, provider_id: providerId, region },
     })
     return response.data as MediaPage
+  },
+
+  async getMovieWatchProviders(region = 'IN'): Promise<WatchProvider[]> {
+    const response = await api.get('/api/v1/media/watch/providers', { params: { region } })
+    return (response.data?.results ?? []) as WatchProvider[]
   },
 
   async getGenres(mediaType = 'movie') {

@@ -68,6 +68,12 @@ export type MovieCollection =
   | 'marathi'
   | 'ott'
 
+export interface WatchProvider {
+  provider_id: number
+  provider_name: string
+  logo_path?: string | null
+}
+
 export interface LibraryEntry {
   id: string
   user_id: string

@@ -14,6 +14,8 @@ interface MediaCollectionPageProps {
   eyebrow: string
   description: string
   collection?: MovieCollection
+  providerId?: number
+  region?: string
   toolbar?: ReactNode
 }
 
@@ -23,6 +25,8 @@ export const MediaCollectionPage = ({
   eyebrow,
   description,
   collection = 'popular',
+  providerId,
+  region = 'IN',
   toolbar,
 }: MediaCollectionPageProps) => {
   const {
@@ -35,9 +39,9 @@ export const MediaCollectionPage = ({
     isFetchingNextPage,
     isFetchNextPageError,
   } = useInfiniteQuery({
-    queryKey: ['media-collection', mediaType, collection],
+    queryKey: ['media-collection', mediaType, collection, providerId, region],
     initialPageParam: 1,
-    queryFn: ({ pageParam }) => mediaService.getPopular(mediaType, pageParam, collection),
+    queryFn: ({ pageParam }) => mediaService.getPopular(mediaType, pageParam, collection, providerId, region),
     getNextPageParam: (lastPage) => lastPage.has_next_page ? lastPage.page + 1 : undefined,
   })
 

@@ -12,6 +12,7 @@ import { canAutoplayBackgroundVideo, getYoutubeVideoId } from '@/utils/youtube'
 import { CommunityFeedbackSection } from '@/components/home/CommunityFeedbackSection'
 import { MediaRail } from '@/components/home/MediaRail'
 import { ContinueWatchingRail } from '@/components/home/ContinueWatchingRail'
+import { StreamingProviderRail } from '@/components/home/StreamingProviderRail'
 import type { Media } from '@/types'
 
 const mediaHref = (media?: { id?: string; provider?: string; provider_id?: number; media_type?: string }) => {
@@ -163,6 +164,7 @@ const HomePage = () => {
                 </button>
               )}
             </div>
+            <StreamingProviderRail />
           </div>
         </div>
       </section>

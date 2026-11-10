@@ -96,7 +96,12 @@ class MediaService:
         return {"results": results, "page": page, "has_next_page": has_next_page}
 
     async def get_popular(
-        self, media_type: str, page: int = 1, collection: MovieCollection = "popular"
+        self,
+        media_type: str,
+        page: int = 1,
+        collection: MovieCollection = "popular",
+        provider_id: int | None = None,
+        region: str = "IN",
     ) -> dict[str, Any]:
         """Get popular media by type."""
         results = []
@@ -104,11 +109,16 @@ class MediaService:
 
         if media_type == "movie":
             if collection in MOVIE_COLLECTION_FILTERS:
+                filters = dict(MOVIE_COLLECTION_FILTERS[collection])
+                if collection == "ott":
+                    filters["watch_region"] = region
+                    if provider_id is not None:
+                        filters["with_watch_providers"] = str(provider_id)
                 tmdb_results = await self.tmdb.discover_movie(
                     {
                         "include_adult": "false",
                         "sort_by": "popularity.desc",
-                        **MOVIE_COLLECTION_FILTERS[collection],
+                        **filters,
                         "page": page,
                     }
                 )
@@ -130,6 +140,21 @@ class MediaService:
             has_next_page = page_info.get("hasNextPage", False)
 
         return {"results": results, "page": page, "has_next_page": has_next_page}
+
+    async def get_movie_watch_providers(self, region: str = "IN") -> list[dict[str, Any]]:
+        """List streaming services available in a market, ordered by TMDB priority."""
+        response = await self.tmdb.get_movie_watch_providers(region)
+        providers = response.get("results", [])
+        providers.sort(key=lambda provider: provider.get("display_priority", 9999))
+        return [
+            {
+                "provider_id": provider.get("provider_id"),
+                "provider_name": provider.get("provider_name"),
+                "logo_path": provider.get("logo_path"),
+            }
+            for provider in providers
+            if provider.get("provider_id") and provider.get("provider_name")
+        ]
 
     async def get_trailer_url(self, provider: str, provider_id: int, media_type: str) -> str | None:
         if provider == "tmdb" and media_type in {"movie", "tv"}:

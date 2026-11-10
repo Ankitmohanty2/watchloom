@@ -21,3 +21,8 @@ const resizeProviderImage = (source: string | undefined, size: 'w342' | 'w1280')
 
 export const getPosterImageUrl = (source: string | undefined) => resizeProviderImage(source, 'w342')
 export const getBackdropImageUrl = (source: string | undefined) => resizeProviderImage(source, 'w1280')
+
+export const getWatchProviderLogoUrl = (path: string | null | undefined) => {
+  if (!path || !path.startsWith('/')) return undefined
+  return `https://${TMDB_IMAGE_HOST}/t/p/w92${path}`
+}
