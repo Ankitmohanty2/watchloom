@@ -16,6 +16,7 @@ docker-compose up --build -d
 
 ---
 
+
 ## ✅ Your Environment is Ready:
 
 - ✅ TMDB API Key: ba2cb02128433a319119adce604a3184
