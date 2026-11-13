@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowRight, Trash2 } from 'lucide-react'
 import { libraryService } from '@/services/libraryService'
 import { MediaCard } from '@/components/media/MediaCard'
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { MediaGridSkeleton } from '@/components/ui/Skeleton'
 import { Button } from '@/components/ui/Button'
 
 const statuses = [
@@ -56,7 +56,7 @@ const LibraryPage = () => {
         </div>
 
         {isLoading ? (
-          <div className="flex min-h-[320px] items-center justify-center rounded-xl border border-border/[0.07] bg-surface"><LoadingSpinner size="lg" /></div>
+          <MediaGridSkeleton label="Loading your library" />
         ) : isError ? (
           <div className="rounded-xl border border-border/[0.08] bg-surface px-6 py-14 text-center">
             <p className="font-semibold text-foreground-strong">Your library couldn’t load.</p>

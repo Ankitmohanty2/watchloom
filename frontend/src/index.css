@@ -142,39 +142,107 @@
   opacity: 1;
 }
 
+/* Sections that sit on top of artwork keep the dark palette in both themes,
+   so text stays readable over posters and backdrops. */
+.cinema-scope {
+  --background-rgb: 11 13 9;
+  --foreground-rgb: 229 235 220;
+  --foreground-strong-rgb: 250 251 246;
+  --surface-rgb: 25 28 23;
+  --surface-alt-rgb: 31 36 28;
+  --surface-hover-rgb: 43 49 37;
+  --muted-rgb: 196 203 188;
+  --muted-foreground-rgb: 150 158 144;
+  --accent-foreground-rgb: 184 243 75;
+  --brand-muted-rgb: 184 243 75;
+  --border-rgb: 232 240 223;
+  --hover-rgb: 255 255 255;
+  color: rgb(var(--foreground-rgb));
+}
+
+.app-header--over-hero {
+  background: transparent !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 .home-hero {
+  background: #0b0d09;
+}
+
+.home-hero-image {
+  animation: hero-image-in 700ms ease-out both;
+}
+
+.home-hero-image--trailer {
+  opacity: 0.82;
+}
+
+.hero-scrim {
   background:
-    radial-gradient(ellipse at 50% 22%, rgb(255 255 255 / 70%) 0 12%, transparent 42%),
-    radial-gradient(ellipse at 14% 88%, rgb(173 226 100 / 54%) 0 13%, transparent 38%),
-    radial-gradient(ellipse at 89% 86%, rgb(183 230 111 / 50%) 0 15%, transparent 39%),
-    linear-gradient(180deg, #dff2fa 0%, #eff9f5 54%, #d9edba 100%);
+    linear-gradient(90deg, rgb(11 13 9 / 0.92) 0%, rgb(11 13 9 / 0.72) 30%, rgb(11 13 9 / 0.22) 60%, transparent 100%),
+    linear-gradient(180deg, rgb(11 13 9 / 0.55) 0%, transparent 22%);
+}
+
+/* On narrow screens the text spans the full width, so shade from the bottom
+   up instead of from the left and keep the top of the artwork clear. */
+@media (max-width: 767px) {
+  .hero-scrim {
+    background: linear-gradient(0deg, rgb(11 13 9 / 0.96) 0%, rgb(11 13 9 / 0.86) 36%, rgb(11 13 9 / 0.3) 70%, rgb(11 13 9 / 0.5) 100%);
+  }
+}
+
+.hero-fade-bottom {
+  background: linear-gradient(0deg, rgb(var(--background-rgb)) 0%, rgb(var(--background-rgb) / 0.6) 40%, transparent 100%);
+}
+
+.discover-featured {
+  background: #0b0d09;
 }
 
 .discover-featured-overlay {
   background:
-    linear-gradient(90deg, rgb(var(--background-rgb) / 0.88) 0%, rgb(var(--background-rgb) / 0.72) 36%, rgb(var(--background-rgb) / 0.28) 75%, rgb(var(--background-rgb) / 0.1) 100%),
-    linear-gradient(0deg, rgb(var(--background-rgb) / 0.72), transparent 68%);
-}
-
-.home-hero-image {
-  opacity: 0.72;
-  filter: saturate(0.96) contrast(1.03);
-}
-
-.home-hero-image--trailer {
-  opacity: 0.36;
-}
-
-.home-hero-overlay-left {
-  background: linear-gradient(90deg, rgb(var(--background-rgb) / 0.84) 0%, rgb(var(--background-rgb) / 0.68) 38%, rgb(var(--background-rgb) / 0.24) 70%, transparent 100%);
-}
-
-.home-hero-overlay-bottom {
-  background: linear-gradient(0deg, rgb(var(--background-rgb) / 0.94) 0%, rgb(var(--background-rgb) / 0.48) 24%, transparent 64%);
+    linear-gradient(90deg, rgb(11 13 9 / 0.92) 0%, rgb(11 13 9 / 0.74) 38%, rgb(11 13 9 / 0.26) 76%, rgb(11 13 9 / 0.08) 100%),
+    linear-gradient(0deg, rgb(11 13 9 / 0.78), transparent 62%);
 }
 
 .media-detail-hero-overlay {
-  background: linear-gradient(0deg, rgb(var(--background-rgb)) 0%, rgb(var(--background-rgb) / 0.62) 32%, rgb(0 0 0 / 0.08) 100%);
+  background:
+    linear-gradient(0deg, rgb(var(--background-rgb)) 0%, rgb(var(--background-rgb) / 0.55) 26%, transparent 62%),
+    linear-gradient(180deg, rgb(11 13 9 / 0.45) 0%, transparent 30%);
+}
+
+/* Loading placeholders */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgb(var(--hover-rgb) / 0.07);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(var(--hover-rgb) / 0.09), transparent);
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes hero-image-in {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 html[data-theme='dark'] body,
@@ -187,37 +255,6 @@ html.dark body {
 html[data-theme='dark'] .nav-shell,
 html.dark .nav-shell {
   box-shadow: 0 16px 42px rgb(0 0 0 / 0.28);
-}
-
-html[data-theme='dark'] .home-hero-image,
-html.dark .home-hero-image {
-  opacity: 0.76;
-  filter: saturate(0.98) contrast(1.03);
-}
-
-html[data-theme='dark'] .home-hero,
-html.dark .home-hero {
-  background:
-    radial-gradient(ellipse at 50% 18%, rgb(184 243 75 / 8%) 0 12%, transparent 44%),
-    radial-gradient(ellipse at 15% 90%, rgb(92 126 55 / 22%) 0 13%, transparent 38%),
-    linear-gradient(180deg, #22281c 0%, #1b2018 56%, #111310 100%);
-}
-
-html[data-theme='dark'] .home-hero-overlay-left,
-html.dark .home-hero-overlay-left {
-  background: linear-gradient(90deg, rgb(var(--background-rgb) / 0.88) 0%, rgb(var(--background-rgb) / 0.70) 38%, rgb(var(--background-rgb) / 0.22) 70%, transparent 100%);
-}
-
-html[data-theme='dark'] .discover-featured-overlay,
-html.dark .discover-featured-overlay {
-  background:
-    linear-gradient(90deg, rgb(var(--background-rgb) / 0.86) 0%, rgb(var(--background-rgb) / 0.7) 36%, rgb(var(--background-rgb) / 0.3) 75%, rgb(var(--background-rgb) / 0.12) 100%),
-    linear-gradient(0deg, rgb(var(--background-rgb) / 0.74), transparent 68%);
-}
-
-html[data-theme='dark'] .home-hero-image--trailer,
-html.dark .home-hero-image--trailer {
-  opacity: 0.42;
 }
 
 .theme-preview-light {

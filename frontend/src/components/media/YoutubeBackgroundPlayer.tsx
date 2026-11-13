@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface YoutubePlayerInstance {
   destroy: () => void
@@ -14,10 +14,15 @@ interface YoutubePlayerOptions {
   playerVars: Record<string, string | number>
   events: {
     onReady: (event: { target: YoutubePlayerInstance }) => void
+    onStateChange: (event: { data: number }) => void
     onError: (event: { data: number }) => void
     onAutoplayBlocked: () => void
   }
 }
+
+// YT.PlayerState.PLAYING
+const YOUTUBE_STATE_PLAYING = 1
+const PLAYER_CHROME_HIDE_MS = 3500
 
 interface YoutubeIframeApi {
   Player: new (element: HTMLElement, options: YoutubePlayerOptions) => YoutubePlayerInstance
@@ -83,6 +88,9 @@ interface YoutubeBackgroundPlayerProps {
 export const YoutubeBackgroundPlayer = ({ videoId, className, onUnavailable }: YoutubeBackgroundPlayerProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const onUnavailableRef = useRef(onUnavailable)
+  // The player is a black box until the video starts, so it stays invisible
+  // until then and the artwork behind it remains on screen.
+  const [hasStarted, setHasStarted] = useState(false)
 
   useEffect(() => {
     onUnavailableRef.current = onUnavailable
@@ -92,7 +100,9 @@ export const YoutubeBackgroundPlayer = ({ videoId, className, onUnavailable }: Y
     const container = containerRef.current
     if (!container) return
 
+    setHasStarted(false)
     let isDisposed = false
+    let revealTimer: number | undefined
     let player: YoutubePlayerInstance | undefined
     const playerMount = document.createElement('div')
     playerMount.className = 'h-full w-full'
@@ -127,6 +137,13 @@ export const YoutubeBackgroundPlayer = ({ videoId, className, onUnavailable }: Y
               target.mute()
               target.playVideo()
             },
+            onStateChange: ({ data }) => {
+              if (data !== YOUTUBE_STATE_PLAYING || isDisposed || revealTimer !== undefined) return
+              // YouTube shows its title and controls for the first moments of playback.
+              revealTimer = window.setTimeout(() => {
+                if (!isDisposed) setHasStarted(true)
+              }, PLAYER_CHROME_HIDE_MS)
+            },
             onError: () => onUnavailableRef.current(),
             onAutoplayBlocked: () => onUnavailableRef.current(),
           },
@@ -138,10 +155,18 @@ export const YoutubeBackgroundPlayer = ({ videoId, className, onUnavailable }: Y
 
     return () => {
       isDisposed = true
+      if (revealTimer !== undefined) window.clearTimeout(revealTimer)
       player?.destroy()
       container.replaceChildren()
     }
   }, [videoId])
 
-  return <div ref={containerRef} className={className} aria-hidden="true" />
+  return (
+    <div
+      ref={containerRef}
+      className={`${className} transition-opacity duration-700`}
+      style={hasStarted ? undefined : { opacity: 0 }}
+      aria-hidden="true"
+    />
+  )
 }

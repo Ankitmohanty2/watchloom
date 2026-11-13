@@ -1,8 +1,11 @@
 """AniList API client."""
+import hashlib
+import json
 from typing import Any
 
 import httpx
 
+from app.core.cache import TTLCache
 from app.core.config import settings
 from app.core.exceptions import ExternalAPIError
 from app.core.logging import get_logger
@@ -13,29 +16,67 @@ logger = get_logger(__name__)
 class AniListClient:
     """Client for AniList GraphQL API."""
 
+    # How long catalog responses are reused before asking AniList again (seconds).
+    LIST_TTL = 15 * 60
+    SEARCH_TTL = 5 * 60
+    DETAIL_TTL = 60 * 60
+
     def __init__(self):
         self.api_url = settings.anilist_api_url
         self.timeout = 10.0
+        self._client: httpx.AsyncClient | None = None
+        self._cache = TTLCache()
 
-    async def _request(self, query: str, variables: dict[str, Any] = None) -> dict[str, Any]:
+    def _get_client(self) -> httpx.AsyncClient:
+        """Reuse one connection pool so requests skip the TLS handshake."""
+        if self._client is None or self._client.is_closed:
+            self._client = httpx.AsyncClient(
+                timeout=self.timeout,
+                # Retry once when the connection itself fails; responses are never retried.
+                transport=httpx.AsyncHTTPTransport(
+                    retries=1,
+                    limits=httpx.Limits(max_keepalive_connections=10, max_connections=20),
+                ),
+            )
+        return self._client
+
+    async def aclose(self) -> None:
+        """Close the shared connection pool."""
+        if self._client is not None and not self._client.is_closed:
+            await self._client.aclose()
+        self._client = None
+
+    async def _request(
+        self, query: str, variables: dict[str, Any] | None = None, ttl: float | None = None
+    ) -> dict[str, Any]:
+        """Make a cached GraphQL request to the AniList API."""
+        request_variables = dict(variables or {})
+        cache_key = hashlib.sha1(
+            json.dumps([query, request_variables], sort_keys=True).encode()
+        ).hexdigest()
+        return await self._cache.get_or_set(
+            cache_key,
+            self.LIST_TTL if ttl is None else ttl,
+            lambda: self._fetch(query, request_variables),
+        )
+
+    async def _fetch(self, query: str, variables: dict[str, Any]) -> dict[str, Any]:
         """Make GraphQL request to AniList API."""
-        if variables is None:
-            variables = {}
-
         try:
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.post(
-                    self.api_url,
-                    json={"query": query, "variables": variables},
-                )
-                response.raise_for_status()
-                data = response.json()
+            response = await self._get_client().post(
+                self.api_url,
+                json={"query": query, "variables": variables},
+            )
+            response.raise_for_status()
+            data = response.json()
 
-                if "errors" in data:
-                    logger.error(f"AniList API errors: {data['errors']}")
-                    raise ExternalAPIError("AniList API error")
+            if "errors" in data:
+                logger.error(f"AniList API errors: {data['errors']}")
+                raise ExternalAPIError("AniList API error")
 
-                return data.get("data", {})
+            return data.get("data", {})
+        except ExternalAPIError:
+            raise
         except httpx.TimeoutException as e:
             logger.error("AniList API timeout")
             raise ExternalAPIError("AniList API timeout") from e
@@ -126,7 +167,7 @@ class AniListClient:
         """
 
         variables = {"search": query, "page": page, "perPage": per_page}
-        data = await self._request(graphql_query, variables)
+        data = await self._request(graphql_query, variables, self.SEARCH_TTL)
         return data.get("Page", {})
 
     async def get_anime(self, anime_id: int) -> dict[str, Any]:
@@ -185,7 +226,7 @@ class AniListClient:
         """
 
         variables = {"id": anime_id}
-        data = await self._request(query, variables)
+        data = await self._request(query, variables, self.DETAIL_TTL)
         return self._normalize_anime(data.get("Media", {}))
 
     async def get_recommended_anime(self, anime_id: int, page: int = 1, per_page: int = 12) -> dict[str, Any]:
@@ -218,7 +259,9 @@ class AniListClient:
           }
         }
         """
-        data = await self._request(query, {"id": anime_id, "page": page, "perPage": per_page})
+        data = await self._request(
+            query, {"id": anime_id, "page": page, "perPage": per_page}, self.DETAIL_TTL
+        )
         recommendations = (data.get("Media") or {}).get("recommendations") or {}
         return {
             "results": recommendations.get("nodes", []),

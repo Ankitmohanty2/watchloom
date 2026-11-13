@@ -5,7 +5,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { ArrowRight, LoaderCircle, RefreshCw } from 'lucide-react'
 import { mediaService } from '@/services/mediaService'
 import { MediaCard } from '@/components/media/MediaCard'
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { MediaGridSkeleton } from '@/components/ui/Skeleton'
 import type { Media, MovieCollection } from '@/types'
 
 interface MediaCollectionPageProps {
@@ -74,9 +74,7 @@ export const MediaCollectionPage = ({
         </header>
 
         {isLoading ? (
-          <div className="flex min-h-[320px] items-center justify-center rounded-xl border border-border/[0.07] bg-surface">
-            <LoadingSpinner size="lg" />
-          </div>
+          <MediaGridSkeleton count={18} />
         ) : isError ? (
           <div className="rounded-xl border border-border/[0.08] bg-surface px-6 py-14 text-center">
             <h2 className="font-display text-xl font-semibold text-foreground-strong">We couldn’t load these titles</h2>

@@ -1,4 +1,6 @@
 """Media service."""
+import asyncio
+from collections.abc import Awaitable
 from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
@@ -40,58 +42,61 @@ class MediaService:
         self, query: str, media_type: str | None = None, page: int = 1
     ) -> dict[str, Any]:
         """Search across all providers."""
-        results = []
-        has_next_page = False
-
-        if media_type in [None, "movie", "tv"]:
-            # Search TMDB
-            try:
-                tmdb_results = await self.tmdb.search_multi(query, page)
-                allowed_types = {"movie", "tv"} if media_type is None else {media_type}
-                for item in tmdb_results.get("results", []):
-                    if item.get("media_type") in allowed_types:
-                        results.append(self._normalize_tmdb_result(item))
-                has_next_page = page < tmdb_results.get("total_pages", page)
-            except Exception:
-                pass
-
-        if media_type in [None, "anime"]:
-            # Search AniList
-            try:
-                anilist_results = await self.anilist.search_anime(query, page)
-                for item in anilist_results.get("media", []):
-                    results.append(self._normalize_anilist_result(item))
-                page_info = anilist_results.get("pageInfo") or {}
-                has_next_page = has_next_page or page_info.get("hasNextPage", False)
-            except Exception:
-                pass
-
-        return {"results": results, "page": page, "has_next_page": has_next_page}
+        allowed_types = {"movie", "tv"} if media_type is None else {media_type}
+        return await self._merge_providers(
+            self.tmdb.search_multi(query, page) if media_type in [None, "movie", "tv"] else None,
+            self.anilist.search_anime(query, page) if media_type in [None, "anime"] else None,
+            allowed_types,
+            page,
+        )
 
     async def get_trending(self, media_type: str = "all", page: int = 1) -> dict[str, Any]:
         """Get trending media."""
+        allowed_types = {"movie", "tv"} if media_type == "all" else {media_type}
+        return await self._merge_providers(
+            self.tmdb.get_trending("all", "week", page)
+            if media_type in ["all", "movie", "tv"]
+            else None,
+            self.anilist.get_trending_anime(page) if media_type in ["all", "anime"] else None,
+            allowed_types,
+            page,
+        )
+
+    async def _merge_providers(
+        self,
+        tmdb_request: Awaitable[dict[str, Any]] | None,
+        anilist_request: Awaitable[dict[str, Any]] | None,
+        allowed_tmdb_types: set[str],
+        page: int,
+    ) -> dict[str, Any]:
+        """Query TMDB and AniList at the same time and merge what each returns.
+
+        A provider that fails is skipped so the other one can still fill the page.
+        """
+
+        async def skipped() -> None:
+            return None
+
+        tmdb_results, anilist_results = await asyncio.gather(
+            tmdb_request or skipped(),
+            anilist_request or skipped(),
+            return_exceptions=True,
+        )
+
         results = []
         has_next_page = False
 
-        if media_type in ["all", "movie", "tv"]:
-            try:
-                tmdb_results = await self.tmdb.get_trending("all", "week", page)
-                for item in tmdb_results.get("results", []):
-                    if item.get("media_type") in ({"movie", "tv"} if media_type == "all" else {media_type}):
-                        results.append(self._normalize_tmdb_result(item))
-                has_next_page = page < tmdb_results.get("total_pages", page)
-            except Exception:
-                pass
+        if isinstance(tmdb_results, dict):
+            for item in tmdb_results.get("results", []):
+                if item.get("media_type") in allowed_tmdb_types:
+                    results.append(self._normalize_tmdb_result(item))
+            has_next_page = page < tmdb_results.get("total_pages", page)
 
-        if media_type in ["all", "anime"]:
-            try:
-                anilist_results = await self.anilist.get_trending_anime(page)
-                for item in anilist_results.get("media", []):
-                    results.append(self._normalize_anilist_result(item))
-                page_info = anilist_results.get("pageInfo") or {}
-                has_next_page = has_next_page or page_info.get("hasNextPage", False)
-            except Exception:
-                pass
+        if isinstance(anilist_results, dict):
+            for item in anilist_results.get("media", []):
+                results.append(self._normalize_anilist_result(item))
+            page_info = anilist_results.get("pageInfo") or {}
+            has_next_page = has_next_page or page_info.get("hasNextPage", False)
 
         return {"results": results, "page": page, "has_next_page": has_next_page}
 

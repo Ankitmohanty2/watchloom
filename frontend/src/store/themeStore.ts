@@ -44,8 +44,12 @@ const themeTokens: Record<Theme, Record<string, string>> = {
 
 const isTheme = (value: unknown): value is Theme => value === 'light' || value === 'dark'
 
+// Must match the default applied by the inline script in index.html, otherwise
+// first-time visitors see the page flash from one theme to the other.
+const DEFAULT_THEME: Theme = 'light'
+
 const readSavedTheme = (): Theme => {
-  if (typeof window === 'undefined') return 'light'
+  if (typeof window === 'undefined') return DEFAULT_THEME
 
   try {
     const savedTheme = window.localStorage.getItem(STORAGE_KEY)
@@ -61,7 +65,7 @@ const readSavedTheme = (): Theme => {
     // Keep the app usable when browser storage is unavailable.
   }
 
-  return 'light'
+  return DEFAULT_THEME
 }
 
 const applyTheme = (theme: Theme) => {

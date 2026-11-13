@@ -19,8 +19,8 @@ export const ContinueWatchingRail = () => {
   if (!isAuthenticated || (!isLoading && !isError && items.length === 0)) return null
 
   return (
-    <section className="border-t border-border/[0.08] py-9 sm:py-11" aria-labelledby="continue-watching-title">
-      <div className="mb-5 flex items-end justify-between gap-4 sm:mb-6">
+    <section className="py-7 sm:py-9" aria-labelledby="continue-watching-title">
+      <div className="mb-4 flex items-end justify-between gap-4 sm:mb-5">
         <div>
           <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.17em] text-brand-muted">Pick up where you left off</p>
           <h2 id="continue-watching-title" className="font-display text-2xl font-semibold tracking-tight text-foreground-strong sm:text-[1.75rem]">Continue watching</h2>

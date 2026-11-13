@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowRight, ArrowUpRight, Clock, Pause, Play, Star } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, CalendarDays, Pause, Play, Star } from 'lucide-react'
 import { mediaService } from '@/services/mediaService'
 import { TrailerButton } from '@/components/media/TrailerButton'
 import { MediaSynopsis } from '@/components/media/MediaSynopsis'
 import { formatMediaRating, getMediaTypeLabel } from '@/utils/media'
-import { getBackdropImageUrl } from '@/utils/mediaImages'
+import { getBackdropImageUrl, getBackdropThumbUrl } from '@/utils/mediaImages'
 import { YoutubeBackgroundPlayer } from '@/components/media/YoutubeBackgroundPlayer'
 import { canAutoplayBackgroundVideo, getYoutubeVideoId } from '@/utils/youtube'
 import { CommunityFeedbackSection } from '@/components/home/CommunityFeedbackSection'
@@ -14,6 +14,8 @@ import { MediaRail } from '@/components/home/MediaRail'
 import { ContinueWatchingRail } from '@/components/home/ContinueWatchingRail'
 import { StreamingProviderRail } from '@/components/home/StreamingProviderRail'
 import type { Media } from '@/types'
+
+const SPOTLIGHT_SIZE = 5
 
 const mediaHref = (media?: { id?: string; provider?: string; provider_id?: number; media_type?: string }) => {
   if (media?.id) return `/media/${media.id}`
@@ -27,6 +29,7 @@ const HomePage = () => {
   const [autoplayAllowed] = useState(canAutoplayBackgroundVideo)
   const [isBackgroundTrailerPlaying, setIsBackgroundTrailerPlaying] = useState(autoplayAllowed)
   const [unavailableTrailerId, setUnavailableTrailerId] = useState<string | null>(null)
+  const [spotlightIndex, setSpotlightIndex] = useState(0)
   const { data: trending, isLoading } = useQuery({
     queryKey: ['home', 'trending', 'all'],
     queryFn: () => mediaService.getTrending('all', 1),
@@ -47,10 +50,13 @@ const HomePage = () => {
     queryFn: () => mediaService.getPopular('anime', 1),
   })
 
-  const featured = trending?.results?.[0]
+  // The spotlight needs wide artwork, so titles without a backdrop are left to the rails.
+  const withBackdrop = trending?.results?.filter((media) => media.backdrop_path) ?? []
+  const spotlight: Media[] = (withBackdrop.length ? withBackdrop : trending?.results ?? []).slice(0, SPOTLIGHT_SIZE)
+  const featured = spotlight[Math.min(spotlightIndex, Math.max(spotlight.length - 1, 0))]
   const movieResults = popularMovies?.results?.length
     ? popularMovies.results
-    : trending?.results?.filter((media: any) => media.media_type === 'movie') ?? []
+    : trending?.results?.filter((media) => media.media_type === 'movie') ?? []
   const heroImage = featured?.backdrop_path || featured?.poster_path
   const featuredRating = formatMediaRating(featured?.rating, featured?.media_type)
   const featuredTrailer = useQuery({
@@ -71,33 +77,37 @@ const HomePage = () => {
 
   return (
     <div className="bg-background text-foreground">
-      <section className="home-hero relative isolate min-h-[620px] overflow-hidden md:min-h-[700px]">
+      {/* The hero slides under the floating header: 74px tall on phones, 84px from the sm breakpoint. */}
+      <section className="home-hero relative isolate -mt-[74px] overflow-hidden sm:-mt-[84px]">
         <div className="absolute inset-0 overflow-hidden">
           {heroImage && (
             <img
+              key={heroImage}
               src={getBackdropImageUrl(heroImage)}
               alt=""
-              className="home-hero-image absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700"
+              className="home-hero-image absolute inset-0 h-full w-full object-cover object-top"
               fetchPriority="high"
             />
           )}
           {showBackgroundTrailer && trailerVideoId && (
             <YoutubeBackgroundPlayer
+              key={trailerVideoId}
               videoId={trailerVideoId}
               onUnavailable={() => setUnavailableTrailerId(trailerVideoId)}
-              className="home-hero-image home-hero-image--trailer pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 scale-110"
+              className="home-hero-image--trailer pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 scale-[1.2]"
             />
           )}
         </div>
-        <div className="home-hero-overlay-left absolute inset-0" />
-        <div className="home-hero-overlay-bottom absolute inset-0" />
+        <div className="hero-scrim absolute inset-0" />
+        <div className="hero-fade-bottom absolute inset-x-0 bottom-0 h-20" />
 
-        <div className="container-custom relative z-10 flex min-h-[620px] items-center py-20 md:min-h-[700px]">
+        <div className="cinema-scope container-custom relative z-10 flex min-h-[600px] flex-col justify-end pb-24 pt-32 md:min-h-[680px] xl:min-h-[720px]">
           <div className="max-w-2xl">
-            <div className="mb-5 inline-flex items-center gap-2 border-l-2 border-primary-600 pl-3 text-xs font-semibold uppercase tracking-[0.16em] text-accent-foreground">
-              <span>{featured ? 'Featured title' : 'Welcome to Watchloom'}</span>
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary-500/30 bg-black/35 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-foreground backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary-500" />
+              <span>{featured ? 'Trending this week' : 'Welcome to Watchloom'}</span>
             </div>
-            <h1 className="font-display text-5xl font-semibold leading-[1.03] tracking-tight text-foreground-strong sm:text-6xl lg:text-7xl">
+            <h1 className="font-display text-4xl font-semibold leading-[1.05] tracking-tight text-foreground-strong [text-wrap:balance] sm:text-6xl lg:text-7xl">
               {featured?.title || 'Stories worth your time.'}
             </h1>
             <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted">
@@ -109,12 +119,12 @@ const HomePage = () => {
               )}
               {featured?.release_date && (
                 <span className="inline-flex items-center gap-1.5">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <CalendarDays className="h-4 w-4 text-muted-foreground" />
                   {new Date(featured.release_date).getFullYear()}
                 </span>
               )}
               {featured?.media_type && (
-                <span>{getMediaTypeLabel(featured)}</span>
+                <span className="rounded-md border border-border/20 px-2 py-0.5 text-xs font-medium text-foreground">{getMediaTypeLabel(featured)}</span>
               )}
             </div>
             {featured?.synopsis ? (
@@ -132,48 +142,98 @@ const HomePage = () => {
                   mediaType={featured.media_type}
                   trailerUrl={featured.trailer_url}
                   onOpen={() => setIsBackgroundTrailerPlaying(false)}
-                  className="inline-flex h-12 items-center gap-2 rounded-full px-5 text-sm font-semibold text-[#11150d] transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-primary-600"
+                  className="inline-flex h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold text-[#11150d] shadow-glow transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-primary-600"
                   style={{ backgroundColor: 'var(--watchloom-primary)' }}
                 />
               ) : (
                 <Link
                   to="/discover"
-                  className="inline-flex h-12 items-center gap-2 rounded-full px-5 text-sm font-semibold text-[#11150d]"
+                  className="inline-flex h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold text-[#11150d] shadow-glow transition hover:brightness-105"
                   style={{ backgroundColor: 'var(--watchloom-primary)' }}
                 >
                   Browse titles
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               )}
-              <Link
-                to={mediaHref(featured)}
-                className="inline-flex h-12 items-center gap-2 rounded-full border border-border/15 bg-surface/70 px-5 text-sm font-semibold text-foreground-strong backdrop-blur transition-colors hover:bg-surface"
-              >
-                Explore title
-                <ArrowUpRight className="h-4 w-4" />
-              </Link>
+              {featured && (
+                <Link
+                  to={mediaHref(featured)}
+                  className="inline-flex h-12 items-center gap-2 rounded-full border border-border/25 bg-white/10 px-5 text-sm font-semibold text-foreground-strong backdrop-blur transition-colors hover:bg-white/20"
+                >
+                  Explore title
+                  <ArrowUpRight className="h-4 w-4" />
+                </Link>
+              )}
               {trailerVideoId && autoplayAllowed && unavailableTrailerId !== trailerVideoId && (
                 <button
                   type="button"
                   onClick={() => setIsBackgroundTrailerPlaying((playing) => !playing)}
                   aria-label={isBackgroundTrailerPlaying ? 'Pause background trailer' : 'Play background trailer'}
                   title={isBackgroundTrailerPlaying ? 'Pause background trailer' : 'Play background trailer'}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border/20 bg-surface/70 text-foreground-strong backdrop-blur transition-colors hover:bg-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-primary-600"
+                  className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-border/25 bg-white/10 text-foreground-strong backdrop-blur transition-colors hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-primary-600"
                 >
                   {isBackgroundTrailerPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
                 </button>
               )}
             </div>
-            <StreamingProviderRail />
+
+            {spotlight.length > 1 && (
+              <div className="mt-8 flex items-center gap-2 xl:hidden" role="group" aria-label="Choose a featured title">
+                {spotlight.map((media, index) => (
+                  <button
+                    key={`${media.provider}-${media.provider_id}`}
+                    type="button"
+                    aria-label={`Feature ${media.title}`}
+                    aria-pressed={media === featured}
+                    onClick={() => setSpotlightIndex(index)}
+                    className="flex h-6 items-center"
+                  >
+                    <span className={`block h-1.5 rounded-full transition-all ${media === featured ? 'w-8 bg-primary-500' : 'w-4 bg-white/35'}`} />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
+
+          {spotlight.length > 1 && (
+            <div className="absolute bottom-24 right-8 hidden items-end gap-2.5 xl:flex" role="group" aria-label="Choose a featured title">
+              {spotlight.map((media, index) => {
+                const isActive = media === featured
+                return (
+                  <button
+                    key={`${media.provider}-${media.provider_id}`}
+                    type="button"
+                    aria-label={`Feature ${media.title}`}
+                    aria-pressed={isActive}
+                    title={media.title}
+                    onClick={() => setSpotlightIndex(index)}
+                    className={`relative aspect-video overflow-hidden rounded-lg bg-surface-alt transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 ${isActive ? 'w-[132px] ring-2 ring-primary-500' : 'w-[104px] opacity-60 ring-1 ring-white/20 hover:opacity-100'}`}
+                  >
+                    <img
+                      src={getBackdropThumbUrl(media.backdrop_path || media.poster_path)}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover"
+                    />
+                    <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 to-transparent px-2 pb-1.5 pt-5 text-left text-[10px] font-semibold text-white">
+                      {media.title}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </div>
       </section>
 
-      <div className="container-custom">
+      <div className="container-custom pb-6">
+        <StreamingProviderRail />
+
         <MediaRail
           eyebrow="A good place to start"
           title="Trending now"
-          items={trending?.results as Media[] | undefined}
+          items={trending?.results}
           to="/discover"
           isLoading={isLoading}
           emptyMessage="The catalog could not be reached. Your trending picks will appear here when it reconnects."
@@ -185,7 +245,7 @@ const HomePage = () => {
           <MediaRail
             eyebrow="On the big screen"
             title={popularMovies?.results?.length ? 'Popular movies' : 'Movies trending now'}
-            items={movieResults as Media[]}
+            items={movieResults}
             to="/movies"
           />
         )}
@@ -194,13 +254,13 @@ const HomePage = () => {
           <MediaRail
             eyebrow="Indian cinema · Hindi language"
             title="Bollywood picks"
-            items={bollywoodMovies.results as Media[]}
+            items={bollywoodMovies.results}
             to="/movies?collection=bollywood"
           />
         )}
 
         {popularAnime && popularAnime.results.length > 0 && (
-          <MediaRail eyebrow="Animation and more" title="Popular anime" items={popularAnime.results as Media[]} to="/anime" />
+          <MediaRail eyebrow="Animation and more" title="Popular anime" items={popularAnime.results} to="/anime" />
         )}
 
         <CommunityFeedbackSection />
@@ -210,7 +270,3 @@ const HomePage = () => {
 }
 
 export default HomePage
-
-
-
-

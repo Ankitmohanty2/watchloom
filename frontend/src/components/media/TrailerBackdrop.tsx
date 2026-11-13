@@ -33,12 +33,12 @@ export const TrailerBackdrop = ({ image, provider, providerId, mediaType, traile
   const showVideo = autoplayAllowed && isPlaying && trailerVideoId && unavailableVideoId !== trailerVideoId
 
   return (
-    <div className="absolute inset-0 overflow-hidden bg-surface">
+    <div className="absolute inset-0 overflow-hidden bg-[#0b0d09]">
       {image && (
         <img
           src={getBackdropImageUrl(image)}
           alt=""
-          className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ${showVideo ? 'opacity-25' : 'opacity-70'}`}
+          className={`absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-700 ${showVideo ? 'opacity-30' : 'opacity-100'}`}
           decoding="async"
         />
       )}

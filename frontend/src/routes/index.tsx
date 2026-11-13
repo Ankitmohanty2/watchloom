@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/authStore'
 // Layouts
 import { MainLayout } from '@/components/layout/MainLayout'
 import { AuthLayout } from '@/components/layout/AuthLayout'
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 
 // Load route code on demand so charts and account flows don't delay the home page.
 const HomePage = lazy(() => import('@/pages/HomePage'))
@@ -23,6 +24,8 @@ const ProfilePage = lazy(() => import('@/pages/ProfilePage'))
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'))
 const TermsPage = lazy(() => import('@/pages/TermsPage'))
 const PrivacyPolicyPage = lazy(() => import('@/pages/PrivacyPolicyPage'))
+const CookiePolicyPage = lazy(() => import('@/pages/CookiePolicyPage'))
+const ContentPolicyPage = lazy(() => import('@/pages/ContentPolicyPage'))
 const AboutPage = lazy(() => import('@/pages/AboutPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 
@@ -38,7 +41,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 export const AppRouter = () => {
   return (
-    <Suspense fallback={<div className="min-h-[65vh] bg-background" aria-label="Loading page" />}>
+    <Suspense
+      fallback={(
+        <div className="flex min-h-dvh items-center justify-center bg-background" role="status" aria-label="Loading page">
+          <LoadingSpinner size="lg" />
+        </div>
+      )}
+    >
       <Routes>
       {/* Public routes */}
       <Route path="/" element={<MainLayout />}>
@@ -52,6 +61,8 @@ export const AppRouter = () => {
         <Route path="about" element={<AboutPage />} />
         <Route path="terms" element={<TermsPage />} />
         <Route path="privacy" element={<PrivacyPolicyPage />} />
+        <Route path="cookies" element={<CookiePolicyPage />} />
+        <Route path="content-policy" element={<ContentPolicyPage />} />
       </Route>
 
       {/* Auth routes */}

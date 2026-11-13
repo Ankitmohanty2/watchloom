@@ -69,9 +69,16 @@ const Footer = () => {
               <li><Link to="/about" className={footerLinkClass}>About &amp; credits</Link></li>
               <li><Link to="/privacy" className={footerLinkClass}>Privacy policy</Link></li>
               <li><Link to="/terms" className={footerLinkClass}>Terms &amp; conditions</Link></li>
+              <li><Link to="/cookies" className={footerLinkClass}>Cookies &amp; storage</Link></li>
+              <li><Link to="/content-policy" className={footerLinkClass}>Content &amp; copyright</Link></li>
             </ul>
           </div>
         </div>
+
+        <p className="border-t border-border/10 py-5 text-xs leading-5 text-muted-foreground">
+          Watchloom does not host or stream any titles. Catalog data and artwork are provided by TMDB and AniList.
+          This product uses the TMDB API but is not endorsed or certified by TMDB.
+        </p>
 
         <div className="flex flex-col gap-2 border-t border-border/10 pt-5 text-xs leading-5 text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Watchloom</p>

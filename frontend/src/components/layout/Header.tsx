@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { BookmarkCheck, ChartNoAxesCombined, LogOut, Menu, Search, User, X } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { BrandMark } from '@/components/layout/BrandMark'
@@ -9,6 +9,19 @@ export const Header = () => {
   const { isAuthenticated, user, logout } = useAuthStore()
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { pathname } = useLocation()
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  // The home page hero runs underneath the header, so the header strip stays
+  // clear there until the visitor scrolls and content starts passing behind it.
+  useEffect(() => {
+    const updateScrolled = () => setIsScrolled(window.scrollY > 24)
+    updateScrolled()
+    window.addEventListener('scroll', updateScrolled, { passive: true })
+    return () => window.removeEventListener('scroll', updateScrolled)
+  }, [])
+
+  const isOverHero = pathname === '/' && !isScrolled
 
   const handleLogout = () => {
     logout()
@@ -21,7 +34,7 @@ export const Header = () => {
     }`
 
   return (
-    <header className="app-header sticky top-0 z-50 px-3 pt-3 sm:px-5 sm:pt-4">
+    <header className={`app-header sticky top-0 z-50 px-3 pt-3 transition-[background-color] duration-300 sm:px-5 sm:pt-4 ${isOverHero ? 'app-header--over-hero' : ''}`}>
       <div className="nav-shell container-custom mx-auto flex h-[62px] max-w-[78rem] items-center justify-between gap-3 rounded-full border px-3 sm:h-[68px] sm:gap-4 sm:px-5 lg:px-7">
         <BrandMark size="compact" />
 

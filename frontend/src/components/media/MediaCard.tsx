@@ -24,15 +24,19 @@ export const MediaCard = ({ media, libraryStatus }: MediaCardProps) => {
 
   const rating = formatMediaRating(media.rating, media.media_type)
   const runtime = getMediaRuntimeLabel(media)
+  const year = media.release_date ? new Date(media.release_date).getFullYear() : null
 
   return (
-    <Link to={linkTo} className="group block min-w-0">
-      <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-border/[0.08] bg-surface-hover shadow-[0_8px_24px_rgba(0,0,0,0.2)]">
+    <Link
+      to={linkTo}
+      className="group block min-w-0 rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary-500"
+    >
+      <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-surface-hover shadow-[0_6px_18px_rgba(0,0,0,0.16)] ring-1 ring-border/10 transition duration-300 ease-out group-hover:-translate-y-1 group-hover:shadow-[0_18px_38px_rgba(0,0,0,0.3)] group-hover:ring-2 group-hover:ring-primary-500/70">
         {media.poster_path ? (
           <img
             src={getPosterImageUrl(media.poster_path)}
             alt={media.title}
-            className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.035] group-hover:brightness-105"
+            className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.04]"
             loading="lazy"
             decoding="async"
           />
@@ -41,29 +45,29 @@ export const MediaCard = ({ media, libraryStatus }: MediaCardProps) => {
             {media.title}
           </div>
         )}
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/65 to-transparent opacity-70 transition-opacity group-hover:opacity-100" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
         {libraryStatus && (
-          <span className="absolute left-2.5 top-2.5 rounded-md border border-primary-500/35 bg-[#101218]/90 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.1em] text-primary-300 backdrop-blur-sm">
+          <span className="absolute left-2 top-2 rounded-md bg-primary-500 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.1em] text-[#11150d] shadow-sm">
             {libraryStatusLabels[libraryStatus]}
           </span>
         )}
-        <span className={`absolute left-2.5 rounded-md border border-border/15 bg-[#101218]/80 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/90 backdrop-blur-sm ${libraryStatus ? 'top-10' : 'top-2.5'}`}>
-          {getMediaTypeLabel(media)}
-        </span>
         {rating && (
-          <span className="absolute right-2.5 top-2.5 inline-flex items-center gap-1 rounded-md border border-border/15 bg-[#101218]/85 px-2 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
+          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-md bg-black/70 px-1.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
             <Star className="h-3 w-3 fill-primary-400 text-primary-400" />
             {rating}
           </span>
         )}
+        <span className="absolute bottom-2.5 left-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/90">
+          {getMediaTypeLabel(media)}
+        </span>
       </div>
       <div className="mt-3 px-0.5">
-        <h3 className="truncate text-[13px] font-medium text-foreground-strong transition-colors group-hover:text-primary-700 sm:text-sm">
+        <h3 className="truncate text-[13px] font-semibold text-foreground-strong transition-colors group-hover:text-accent-foreground sm:text-sm">
           {media.title}
         </h3>
         <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
-          {media.release_date && <span>{new Date(media.release_date).getFullYear()}</span>}
-          {media.release_date && media.genres?.[0] && <span className="h-0.5 w-0.5 rounded-full bg-slate-600" />}
+          {year && <span>{year}</span>}
+          {year && media.genres?.[0] && <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/70" />}
           {media.genres?.[0] && <span className="max-w-24 truncate">{media.genres[0]}</span>}
           {runtime && (
             <span className="inline-flex shrink-0 items-center gap-1" title={isEpisodeBasedMedia(media) ? 'Runtime per episode' : 'Runtime'}>
@@ -75,7 +79,3 @@ export const MediaCard = ({ media, libraryStatus }: MediaCardProps) => {
     </Link>
   )
 }
-
-
-
-

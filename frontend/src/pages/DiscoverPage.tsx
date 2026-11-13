@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { mediaService } from '@/services/mediaService'
 import { MediaCard } from '@/components/media/MediaCard'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { MediaGridSkeleton } from '@/components/ui/Skeleton'
 import type { Media } from '@/types'
 import { formatMediaRating, getMediaRuntimeLabel, getMediaTypeLabel } from '@/utils/media'
 import { MediaSynopsis } from '@/components/media/MediaSynopsis'
@@ -111,7 +112,7 @@ const DiscoverPage = () => {
       <main className="container-custom pb-20 pt-8 sm:pt-12">
         <div className="mb-7 flex flex-col gap-5 border-b border-border/[0.08] pb-6 md:mb-8 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary-500">
+            <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-muted">
               <span>Your next watch starts here</span>
             </div>
             <h1 className="font-display text-3xl font-semibold tracking-[-0.035em] text-foreground-strong sm:text-[2.5rem]">
@@ -180,13 +181,13 @@ const DiscoverPage = () => {
               >
                 {normalizedSearch !== debouncedQuery || suggestionsLoading ? (
                   <div role="status" className="flex items-center gap-3 px-4 py-4 text-sm text-muted-foreground">
-                    <LoaderCircle className="h-4 w-4 animate-spin text-primary-400" />
+                    <LoaderCircle className="h-4 w-4 animate-spin text-accent-foreground" />
                     Searching for “{normalizedSearch}”…
                   </div>
                 ) : suggestionsError ? (
                   <div className="flex items-center justify-between gap-4 px-4 py-4 text-sm text-muted-foreground">
                     <span>Suggestions are unavailable right now.</span>
-                    <button type="button" onClick={() => retrySuggestions()} className="shrink-0 font-medium text-primary-400 hover:text-primary-300">
+                    <button type="button" onClick={() => retrySuggestions()} className="shrink-0 font-medium text-accent-foreground hover:text-foreground-strong">
                       Try again
                     </button>
                   </div>
@@ -228,7 +229,7 @@ const DiscoverPage = () => {
                     </ul>
                     <button
                       type="submit"
-                      className="flex w-full items-center justify-between border-t border-border/[0.07] px-4 py-3 text-left text-sm font-medium text-primary-300 transition-colors hover:bg-hover/[0.04]"
+                      className="flex w-full items-center justify-between border-t border-border/[0.07] px-4 py-3 text-left text-sm font-medium text-accent-foreground transition-colors hover:bg-hover/[0.04]"
                     >
                       See all results for “{normalizedSearch}”
                       <ArrowUpRight className="h-4 w-4" />
@@ -264,9 +265,10 @@ const DiscoverPage = () => {
         </section>
 
         {isLoading ? (
-          <div className="flex min-h-[360px] items-center justify-center rounded-2xl border border-border/[0.06] bg-surface/70">
-            <LoadingSpinner size="lg" />
-          </div>
+          <>
+            <div className="skeleton mb-10 min-h-[340px] rounded-[1.75rem] sm:min-h-[390px]" aria-hidden="true" />
+            <MediaGridSkeleton />
+          </>
         ) : isError ? (
           <div className="rounded-2xl border border-border/[0.07] bg-surface/70 px-6 py-14 text-center">
             <h2 className="font-display text-xl font-semibold text-foreground-strong">The catalog is unavailable</h2>
@@ -278,17 +280,17 @@ const DiscoverPage = () => {
         ) : items.length > 0 ? (
           <>
             {featured && (
-            <section aria-label="Featured title" className="discover-featured group relative mb-10 min-h-[340px] overflow-hidden rounded-[1.75rem] border border-border/[0.08] bg-surface-hover sm:min-h-[390px]">
+            <section aria-label="Featured title" className="discover-featured group relative mb-10 min-h-[340px] overflow-hidden rounded-[1.75rem] shadow-[0_18px_50px_rgba(0,0,0,0.18)] ring-1 ring-border/10 sm:min-h-[390px]">
               {featured.backdrop_path || featured.poster_path ? (
                 <img
                   src={getBackdropImageUrl(featured.backdrop_path || featured.poster_path)}
                   alt=""
-                  className="discover-featured-image absolute inset-0 h-full w-full object-cover object-center opacity-80 transition-transform duration-700 group-hover:scale-[1.015]"
+                  className="discover-featured-image absolute inset-0 h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.015]"
                 />
               ) : null}
               <div className="discover-featured-overlay absolute inset-0" />
-              <div className="relative flex min-h-[340px] max-w-2xl flex-col justify-end p-6 sm:min-h-[390px] sm:p-9 lg:p-11">
-                <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-primary-500/25 bg-background/65 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-300 backdrop-blur">
+              <div className="cinema-scope relative flex min-h-[340px] max-w-2xl flex-col justify-end p-6 sm:min-h-[390px] sm:p-9 lg:p-11">
+                <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-primary-500/30 bg-black/35 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-foreground backdrop-blur">
                   <span className="h-1.5 w-1.5 rounded-full bg-primary-600" />
                   {activeSearch ? 'Search match' : 'Trending right now'}
                 </div>
@@ -297,7 +299,7 @@ const DiscoverPage = () => {
                 </h2>
                 <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted">
                   {featured.release_date && <span>{new Date(featured.release_date).getFullYear()}</span>}
-                  {featured.release_date && <span className="h-1 w-1 rounded-full bg-slate-500" />}
+                  {featured.release_date && <span className="h-1 w-1 rounded-full bg-muted-foreground" />}
                   <span>{getMediaTypeLabel(featured)}</span>
                   {featuredRuntime && (
                     <span className="inline-flex items-center gap-1.5 border-l border-border/20 pl-3">
@@ -423,7 +425,7 @@ const DiscoverPage = () => {
               Try a different search or choose another category to see what’s playing.
             </p>
             {activeSearch && (
-              <button onClick={clearSearch} className="mt-5 text-sm font-medium text-primary-400 transition hover:text-primary-300">
+              <button onClick={clearSearch} className="mt-5 text-sm font-medium text-accent-foreground transition hover:text-foreground-strong">
                 Clear search
               </button>
             )}

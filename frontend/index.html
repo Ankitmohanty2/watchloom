@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="dark" data-theme="dark">
+<html lang="en" class="light" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content="Keep your movies, series, and anime together. Discover what to watch next, save titles to your library, and track your progress with Watchloom." />
@@ -10,7 +10,8 @@
     <title>Watchloom - Track Your Entertainment</title>
     <script>
       (() => {
-        let theme = 'dark'
+        // Keep this default in sync with DEFAULT_THEME in src/store/themeStore.ts.
+        let theme = 'light'
         try {
           const savedTheme = localStorage.getItem('watchloom-theme')
           if (savedTheme === 'light' || savedTheme === 'dark') {
@@ -22,7 +23,7 @@
             }
           }
         } catch {
-          // The app starts in dark mode if browser storage is unavailable.
+          // The app starts in light mode if browser storage is unavailable.
         }
         document.documentElement.dataset.theme = theme
         document.documentElement.classList.toggle('light', theme === 'light')
@@ -31,6 +32,11 @@
       })()
     </script>
     
+    <!-- Open connections early to the API and artwork hosts used on first paint. -->
+    <link rel="preconnect" href="https://watchloom.onrender.com" crossorigin>
+    <link rel="preconnect" href="https://image.tmdb.org">
+    <link rel="dns-prefetch" href="https://s4.anilist.co">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
