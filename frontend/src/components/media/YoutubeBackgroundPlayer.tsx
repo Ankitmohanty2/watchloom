@@ -83,18 +83,22 @@ interface YoutubeBackgroundPlayerProps {
   videoId: string
   className: string
   onUnavailable: () => void
+  /** Fires once the trailer is actually playing and safe to show over the poster. */
+  onPlaybackVisible?: () => void
 }
 
-export const YoutubeBackgroundPlayer = ({ videoId, className, onUnavailable }: YoutubeBackgroundPlayerProps) => {
+export const YoutubeBackgroundPlayer = ({ videoId, className, onUnavailable, onPlaybackVisible }: YoutubeBackgroundPlayerProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const onUnavailableRef = useRef(onUnavailable)
+  const onPlaybackVisibleRef = useRef(onPlaybackVisible)
   // The player is a black box until the video starts, so it stays invisible
   // until then and the artwork behind it remains on screen.
   const [hasStarted, setHasStarted] = useState(false)
 
   useEffect(() => {
     onUnavailableRef.current = onUnavailable
-  }, [onUnavailable])
+    onPlaybackVisibleRef.current = onPlaybackVisible
+  }, [onUnavailable, onPlaybackVisible])
 
   useEffect(() => {
     const container = containerRef.current
@@ -141,7 +145,9 @@ export const YoutubeBackgroundPlayer = ({ videoId, className, onUnavailable }: Y
               if (data !== YOUTUBE_STATE_PLAYING || isDisposed || revealTimer !== undefined) return
               // YouTube shows its title and controls for the first moments of playback.
               revealTimer = window.setTimeout(() => {
-                if (!isDisposed) setHasStarted(true)
+                if (isDisposed) return
+                setHasStarted(true)
+                onPlaybackVisibleRef.current?.()
               }, PLAYER_CHROME_HIDE_MS)
             },
             onError: () => onUnavailableRef.current(),
@@ -164,8 +170,7 @@ export const YoutubeBackgroundPlayer = ({ videoId, className, onUnavailable }: Y
   return (
     <div
       ref={containerRef}
-      className={`${className} transition-opacity duration-700`}
-      style={hasStarted ? undefined : { opacity: 0 }}
+      className={`${className} transition-opacity duration-700 ease-out ${hasStarted ? 'opacity-100' : 'pointer-events-none invisible opacity-0'}`}
       aria-hidden="true"
     />
   )

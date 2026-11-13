@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowRight, ArrowUpRight, CalendarDays, Pause, Play, Star } from 'lucide-react'
@@ -27,7 +27,9 @@ const mediaHref = (media?: { id?: string; provider?: string; provider_id?: numbe
 
 const HomePage = () => {
   const [autoplayAllowed] = useState(canAutoplayBackgroundVideo)
-  const [isBackgroundTrailerPlaying, setIsBackgroundTrailerPlaying] = useState(autoplayAllowed)
+  // Start on the poster only; background video begins only when the visitor opts in.
+  const [isBackgroundTrailerPlaying, setIsBackgroundTrailerPlaying] = useState(false)
+  const [heroVideoVisible, setHeroVideoVisible] = useState(false)
   const [unavailableTrailerId, setUnavailableTrailerId] = useState<string | null>(null)
   const [spotlightIndex, setSpotlightIndex] = useState(0)
   const { data: trending, isLoading } = useQuery({
@@ -75,17 +77,22 @@ const HomePage = () => {
     && Boolean(trailerVideoId)
     && unavailableTrailerId !== trailerVideoId
 
+  useEffect(() => {
+    setHeroVideoVisible(false)
+    setIsBackgroundTrailerPlaying(false)
+  }, [heroImage, trailerVideoId])
+
   return (
     <div className="bg-background text-foreground">
       {/* The hero slides under the floating header: 74px tall on phones, 84px from the sm breakpoint. */}
       <section className="home-hero relative isolate -mt-[74px] overflow-hidden sm:-mt-[84px]">
-        <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden bg-[#0b0d09]">
           {heroImage && (
             <img
               key={heroImage}
               src={getBackdropImageUrl(heroImage)}
               alt=""
-              className="home-hero-image absolute inset-0 h-full w-full object-cover object-top"
+              className={`home-hero-image absolute inset-0 z-0 h-full w-full object-cover object-top transition-opacity duration-700 ease-out ${heroVideoVisible ? 'opacity-0' : 'opacity-100'}`}
               fetchPriority="high"
             />
           )}
@@ -93,8 +100,12 @@ const HomePage = () => {
             <YoutubeBackgroundPlayer
               key={trailerVideoId}
               videoId={trailerVideoId}
-              onUnavailable={() => setUnavailableTrailerId(trailerVideoId)}
-              className="home-hero-image--trailer pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 scale-[1.2]"
+              onUnavailable={() => {
+                setUnavailableTrailerId(trailerVideoId)
+                setHeroVideoVisible(false)
+              }}
+              onPlaybackVisible={() => setHeroVideoVisible(true)}
+              className="home-hero-video pointer-events-none absolute inset-0 z-[1] left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 scale-[1.05]"
             />
           )}
         </div>
@@ -164,10 +175,15 @@ const HomePage = () => {
                   <ArrowUpRight className="h-4 w-4" />
                 </Link>
               )}
-              {trailerVideoId && autoplayAllowed && unavailableTrailerId !== trailerVideoId && (
+              {trailerVideoId && autoplayAllowed && (
                 <button
                   type="button"
-                  onClick={() => setIsBackgroundTrailerPlaying((playing) => !playing)}
+                  onClick={() => {
+                    setIsBackgroundTrailerPlaying((playing) => {
+                      if (playing) setHeroVideoVisible(false)
+                      return !playing
+                    })
+                  }}
                   aria-label={isBackgroundTrailerPlaying ? 'Pause background trailer' : 'Play background trailer'}
                   title={isBackgroundTrailerPlaying ? 'Pause background trailer' : 'Play background trailer'}
                   className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-border/25 bg-white/10 text-foreground-strong backdrop-blur transition-colors hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-primary-600"

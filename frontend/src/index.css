@@ -174,8 +174,8 @@
   animation: hero-image-in 700ms ease-out both;
 }
 
-.home-hero-image--trailer {
-  opacity: 0.82;
+.home-hero-video {
+  filter: saturate(0.96) contrast(1.02);
 }
 
 .hero-scrim {
