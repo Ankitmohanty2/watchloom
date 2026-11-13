@@ -38,12 +38,15 @@ export const MediaCollectionPage = ({
     fetchNextPage,
     isFetchingNextPage,
     isFetchNextPageError,
+    isFetching,
   } = useInfiniteQuery({
     queryKey: ['media-collection', mediaType, collection, providerId, region],
     initialPageParam: 1,
     queryFn: ({ pageParam }) => mediaService.getPopular(mediaType, pageParam, collection, providerId, region),
     getNextPageParam: (lastPage) => lastPage.has_next_page ? lastPage.page + 1 : undefined,
   })
+
+  const isRefreshing = isFetching && !isLoading && !isFetchingNextPage
 
   const items: Media[] = useMemo(() => {
     const seen = new Set<string>()
@@ -85,7 +88,13 @@ export const MediaCollectionPage = ({
           </div>
         ) : items.length > 0 ? (
           <>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-5 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {isRefreshing && (
+              <p role="status" className="mb-4 text-sm text-muted-foreground">Updating titles for this service…</p>
+            )}
+            <div
+              aria-busy={isRefreshing}
+              className={`grid grid-cols-2 gap-x-4 gap-y-8 transition-opacity sm:grid-cols-3 sm:gap-x-5 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 ${isRefreshing ? 'pointer-events-none opacity-50' : ''}`}
+            >
               {items.map((media) => (
                 <MediaCard key={`${media.provider}-${media.provider_id}`} media={media} />
               ))}

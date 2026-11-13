@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
+import { parseWatchProviderId } from '@/utils/watchProviders'
 import { WatchProviderLogo } from '@/components/media/WatchProviderLogo'
 import { MediaCollectionPage } from '@/components/media/MediaCollectionPage'
 import { mediaService } from '@/services/mediaService'
@@ -94,20 +96,40 @@ const movieCollections: Array<{
 const MoviesPage = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const requestedCollection = searchParams.get('collection')
+  const requestedProviderId = parseWatchProviderId(searchParams.get('provider_id'))
   const activeCollection = movieCollections.find(({ value }) => value === requestedCollection)?.value ?? 'popular'
-  const selected = movieCollections.find(({ value }) => value === activeCollection) ?? movieCollections[0]
+  const collectionForFetch: MovieCollection = requestedProviderId ? 'ott' : activeCollection
+  const selected = movieCollections.find(({ value }) => value === collectionForFetch) ?? movieCollections[0]
   const region = searchParams.get('region') === 'US' ? 'US' : 'IN'
-  const requestedProviderId = Number(searchParams.get('provider_id'))
   const providersQuery = useQuery({
     queryKey: ['movie-watch-providers', region],
     queryFn: () => mediaService.getMovieWatchProviders(region),
-    enabled: activeCollection === 'ott',
+    enabled: collectionForFetch === 'ott',
     staleTime: 6 * 60 * 60 * 1000,
     retry: 1,
   })
   const providers = providersQuery.data ?? []
-  const selectedProvider = providers.find(({ provider_id }) => provider_id === requestedProviderId)
+  const selectedProvider = requestedProviderId
+    ? providers.find(({ provider_id }) => provider_id === requestedProviderId)
+    : undefined
+  const ottProviderId = collectionForFetch === 'ott' ? requestedProviderId : undefined
   const regionLabel = region === 'IN' ? 'India' : 'United States'
+
+  // Deep links from the home rail should always open the OTT view with a region set.
+  useEffect(() => {
+    if (!requestedProviderId) return
+    const next = new URLSearchParams(searchParams)
+    let changed = false
+    if (searchParams.get('collection') !== 'ott') {
+      next.set('collection', 'ott')
+      changed = true
+    }
+    if (!searchParams.get('region')) {
+      next.set('region', 'IN')
+      changed = true
+    }
+    if (changed) setSearchParams(next, { replace: true })
+  }, [requestedProviderId, searchParams, setSearchParams])
 
   const selectCollection = (nextCollection: MovieCollection) => {
     const nextParams = new URLSearchParams(searchParams)
@@ -139,21 +161,25 @@ const MoviesPage = () => {
   return (
     <MediaCollectionPage
       mediaType="movie"
-      collection={activeCollection}
-      providerId={activeCollection === 'ott' && selectedProvider ? selectedProvider.provider_id : undefined}
+      collection={collectionForFetch}
+      providerId={ottProviderId}
       region={region}
-      eyebrow={activeCollection === 'ott' ? `Streaming · ${regionLabel}` : selected.eyebrow}
-      title={activeCollection === 'ott' && selectedProvider ? `${selectedProvider.provider_name} movies` : selected.title}
-      description={activeCollection === 'ott'
-        ? selectedProvider
-          ? `Popular movies available on ${selectedProvider.provider_name} in ${regionLabel}.`
+      eyebrow={collectionForFetch === 'ott' ? `Streaming · ${regionLabel}` : selected.eyebrow}
+      title={collectionForFetch === 'ott' && requestedProviderId
+        ? `${selectedProvider?.provider_name ?? 'Streaming service'} movies`
+        : selected.title}
+      description={collectionForFetch === 'ott'
+        ? requestedProviderId
+          ? selectedProvider
+            ? `Popular movies available on ${selectedProvider.provider_name} in ${regionLabel}.`
+            : `Loading movies for this streaming service in ${regionLabel}…`
           : `Popular movies available to stream in ${regionLabel}. Choose a service to narrow the list.`
         : selected.description}
       toolbar={(
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2" role="group" aria-label="Choose a movie collection">
             {movieCollections.map(({ value, label }) => {
-              const isSelected = activeCollection === value
+              const isSelected = collectionForFetch === value
               return (
                 <button
                   key={value}
@@ -167,7 +193,7 @@ const MoviesPage = () => {
               )
             })}
           </div>
-          {activeCollection === 'ott' && (
+          {collectionForFetch === 'ott' && (
             <section aria-label="Filter by streaming service" className="rounded-xl border border-border/[0.08] bg-surface/55 p-4 sm:p-5">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -202,15 +228,15 @@ const MoviesPage = () => {
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" role="group" aria-label="Streaming providers">
                   <button
                     type="button"
-                    aria-pressed={!selectedProvider}
+                    aria-pressed={!requestedProviderId}
                     onClick={() => selectProvider()}
-                    className={`flex min-h-12 items-center gap-2.5 rounded-lg border px-3 py-2 text-left text-sm font-medium transition ${!selectedProvider ? 'border-primary-500/45 bg-primary-500/[0.08] text-foreground-strong' : 'border-border/[0.1] bg-background/60 text-muted-foreground hover:bg-surface hover:text-foreground-strong'}`}
+                    className={`flex min-h-12 items-center gap-2.5 rounded-lg border px-3 py-2 text-left text-sm font-medium transition ${!requestedProviderId ? 'border-primary-500/45 bg-primary-500/[0.08] text-foreground-strong' : 'border-border/[0.1] bg-background/60 text-muted-foreground hover:bg-surface hover:text-foreground-strong'}`}
                   >
                     <span className="flex h-7 w-7 items-center justify-center rounded-md bg-surface text-xs font-semibold">All</span>
                     All services
                   </button>
                   {providers.map((provider) => {
-                    const isSelected = selectedProvider?.provider_id === provider.provider_id
+                    const isSelected = requestedProviderId === provider.provider_id
                     return (
                       <button
                         key={provider.provider_id}

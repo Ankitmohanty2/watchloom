@@ -23,9 +23,14 @@ export const mediaService = {
     providerId?: number,
     region = 'IN',
   ): Promise<MediaPage> {
-    const response = await api.get('/api/v1/media/popular', {
-      params: { media_type: mediaType, page, collection, provider_id: providerId, region },
-    })
+    const params: Record<string, string | number> = {
+      media_type: mediaType,
+      page,
+      collection,
+      region,
+    }
+    if (providerId !== undefined) params.provider_id = providerId
+    const response = await api.get('/api/v1/media/popular', { params })
     return response.data as MediaPage
   },
 

@@ -119,6 +119,8 @@ class MediaService:
                     filters["watch_region"] = region
                     if provider_id is not None:
                         filters["with_watch_providers"] = str(provider_id)
+                        # One service can have a thinner catalog; the global vote floor hides too much.
+                        filters.pop("vote_count.gte", None)
                 tmdb_results = await self.tmdb.discover_movie(
                     {
                         "include_adult": "false",
