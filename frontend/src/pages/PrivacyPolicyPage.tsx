@@ -19,6 +19,7 @@ const sections: LegalSection[] = [
       'A profile photo, if you choose to upload one.',
       'Your watchlist status, ratings, preferences, and saved season and episode progress.',
       'A community comment, if you choose to publish one. Your display name and comment are shown publicly in the community carousel; your email and watchlist are not.',
+      'Improvement notes you send from the footer form, including an optional reply email and the page you were on. These are stored as internal issues and are not shown publicly.',
       'Short-lived email codes used for account verification and password changes.',
     ],
   },

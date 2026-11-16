@@ -1,7 +1,7 @@
 """Main API router."""
 from fastapi import APIRouter
 
-from app.api.v1 import auth, feedback, library, media, progress, statistics, users
+from app.api.v1 import auth, feedback, library, media, progress, site_issues, statistics, users
 
 api_router = APIRouter(prefix="/api/v1")
 
@@ -13,3 +13,4 @@ api_router.include_router(library.router)
 api_router.include_router(progress.router)
 api_router.include_router(statistics.router)
 api_router.include_router(feedback.router)
+api_router.include_router(site_issues.router)

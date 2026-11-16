@@ -66,6 +66,15 @@ class EmailService:
             raise RuntimeError("SMTP email delivery is not configured")
         await asyncio.to_thread(self._send_password_change_code, recipient, code)
 
+    async def send_plain_notification(self, recipient: str, subject: str, body: str) -> None:
+        """Deliver a simple text message to the site owner or support inbox."""
+        if self.resend_api_key:
+            await asyncio.to_thread(self._send_resend_plain_text, recipient, subject, body)
+            return
+        if not self.smtp_is_configured:
+            raise RuntimeError("Email delivery is not configured")
+        await asyncio.to_thread(self._send_plain_text_smtp, recipient, subject, body)
+
     async def send_email_verification_code(self, recipient: str, code: str) -> None:
         """Send a short-lived email ownership verification code."""
         if not self.is_configured:
@@ -134,6 +143,37 @@ class EmailService:
             raise RuntimeError(detail) from error
         except urllib.error.URLError as error:
             raise RuntimeError("Could not connect to Resend to send the template email.") from error
+
+    @staticmethod
+    def _send_plain_text_smtp(recipient: str, subject: str, body: str) -> None:
+        message = EmailMessage()
+        message["Subject"] = subject
+        message["From"] = f"Watchloom <{EmailService().sender_email}>"
+        message["To"] = recipient
+        message.set_content(body)
+        EmailService._deliver(message)
+
+    def _send_resend_plain_text(self, recipient: str, subject: str, body: str) -> None:
+        payload = {
+            "from": f"Watchloom <{self.sender_email}>",
+            "to": [recipient],
+            "subject": subject,
+            "text": body,
+        }
+        request = urllib.request.Request(
+            "https://api.resend.com/emails",
+            data=json.dumps(payload).encode(),
+            headers={
+                "Authorization": f"Bearer {self.resend_api_key}",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "User-Agent": "Watchloom/1.0",
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(request, timeout=15) as response:
+            if not 200 <= response.status < 300:
+                raise RuntimeError(f"Resend rejected the notification email (HTTP {response.status}).")
 
     @staticmethod
     def _send_password_change_code(recipient: str, code: str) -> None:

@@ -1,6 +1,7 @@
 import { Link, Outlet } from 'react-router-dom'
 import { ArrowUpRight } from 'lucide-react'
 import { Header } from './Header'
+import { FooterImprovementForm } from './FooterImprovementForm'
 import { useAuthStore } from '@/store/authStore'
 
 const Footer = () => {
@@ -75,7 +76,9 @@ const Footer = () => {
           </div>
         </div>
 
-        <p className="border-t border-border/10 py-5 text-xs leading-5 text-muted-foreground">
+        <FooterImprovementForm />
+
+        <p className="mt-10 border-t border-border/10 py-5 text-xs leading-5 text-muted-foreground">
           Watchloom does not host or stream any titles. Catalog data and artwork are provided by TMDB and AniList.
           This product uses the TMDB API but is not endorsed or certified by TMDB.
         </p>

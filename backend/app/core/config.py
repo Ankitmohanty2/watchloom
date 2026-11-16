@@ -45,6 +45,8 @@ class Settings(BaseSettings):
     smtp_starttls: bool = True
     resend_api_key: str | None = None
     resend_otp_template_id: str | None = None
+    # Optional inbox for footer improvement reports (stored in MongoDB either way).
+    site_issue_notify_email: str | None = None
 
     # CORS
     frontend_url: str = "http://localhost:5173"

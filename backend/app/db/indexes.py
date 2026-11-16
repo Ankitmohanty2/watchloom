@@ -113,4 +113,11 @@ async def create_indexes(db: AsyncIOMotorDatabase) -> None:
     await db.site_feedback.create_indexes(feedback_indexes)
     logger.info("Created site_feedback indexes")
 
+    site_issue_indexes = [
+        IndexModel([("status", ASCENDING), ("created_at", DESCENDING)], name="site_issues_status_created"),
+        IndexModel([("created_at", DESCENDING)], name="site_issues_created_at"),
+    ]
+    await db.site_issues.create_indexes(site_issue_indexes)
+    logger.info("Created site_issues indexes")
+
     logger.info("All indexes created successfully")
