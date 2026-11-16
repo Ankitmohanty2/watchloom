@@ -94,38 +94,48 @@ export const FooterImprovementForm = () => {
             className="w-full max-w-xl space-y-4 rounded-2xl border border-border/10 bg-surface p-5 sm:p-6"
             noValidate
           >
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="sm:col-span-1">
-                <label htmlFor="footer-issue-category" className="mb-1.5 block text-sm font-medium text-foreground-strong">
-                  Type
-                </label>
-                <select
-                  id="footer-issue-category"
-                  value={category}
-                  onChange={(event) => setCategory(event.target.value as SiteIssueCategory)}
-                  className="h-11 w-full rounded-xl border border-border/15 bg-background px-3 text-sm text-foreground outline-none transition focus-visible:border-primary-500 focus-visible:ring-2 focus-visible:ring-primary-500/25"
-                >
-                  {categories.map((item) => (
-                    <option key={item.value} value={item.value}>
+            <fieldset className="m-0 space-y-2 border-0 p-0">
+              <legend className="mb-1.5 block w-full text-sm font-medium text-foreground-strong">Type</legend>
+              <div
+                role="radiogroup"
+                aria-label="Feedback type"
+                className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap"
+              >
+                {categories.map((item) => {
+                  const isSelected = category === item.value
+                  return (
+                    <button
+                      key={item.value}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      onClick={() => setCategory(item.value)}
+                      className={`min-h-11 rounded-xl border px-3 py-2 text-left text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 ${
+                        isSelected
+                          ? 'border-primary-500/50 bg-primary-500/15 text-foreground-strong shadow-sm'
+                          : 'border-border/15 bg-background text-muted-foreground hover:border-border/25 hover:bg-surface hover:text-foreground-strong'
+                      }`}
+                    >
                       {item.label}
-                    </option>
-                  ))}
-                </select>
+                    </button>
+                  )
+                })}
               </div>
-              <div className="sm:col-span-1">
-                <label htmlFor="footer-issue-email" className="mb-1.5 block text-sm font-medium text-foreground-strong">
-                  Email <span className="font-normal text-muted">(optional)</span>
-                </label>
-                <input
-                  id="footer-issue-email"
-                  type="email"
-                  autoComplete="email"
-                  value={contactEmail}
-                  onChange={(event) => setContactEmail(event.target.value)}
-                  placeholder="you@example.com"
-                  className="h-11 w-full rounded-xl border border-border/15 bg-background px-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:border-primary-500 focus-visible:ring-2 focus-visible:ring-primary-500/25"
-                />
-              </div>
+            </fieldset>
+
+            <div>
+              <label htmlFor="footer-issue-email" className="mb-1.5 block text-sm font-medium text-foreground-strong">
+                Email <span className="font-normal text-muted">(optional)</span>
+              </label>
+              <input
+                id="footer-issue-email"
+                type="email"
+                autoComplete="email"
+                value={contactEmail}
+                onChange={(event) => setContactEmail(event.target.value)}
+                placeholder="you@example.com"
+                className="h-11 w-full rounded-xl border border-border/15 bg-background px-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:border-primary-500 focus-visible:ring-2 focus-visible:ring-primary-500/25"
+              />
             </div>
 
             <div>
