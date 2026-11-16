@@ -11,6 +11,13 @@ from app.models.media import MediaModel
 from app.repositories.media_repository import MediaRepository
 from app.schemas.media import MovieCollection
 
+WATCH_PROVIDER_NAME_SKIP = (
+    " amazon channel",
+    " apple tv channel",
+    " with ads",
+    " beta",
+)
+
 MOVIE_COLLECTION_FILTERS: dict[str, dict[str, str]] = {
     "top_rated": {"sort_by": "vote_average.desc", "vote_count.gte": "100"},
     "hollywood": {"with_origin_country": "US", "with_original_language": "en"},
@@ -160,8 +167,16 @@ class MediaService:
                 "logo_path": provider.get("logo_path"),
             }
             for provider in providers
-            if provider.get("provider_id") and provider.get("provider_name")
+            if provider.get("provider_id")
+            and provider.get("provider_name")
+            and self._is_curated_watch_provider(provider.get("provider_name", ""))
         ]
+
+    @staticmethod
+    def _is_curated_watch_provider(name: str) -> bool:
+        """Drop add-on channels and duplicates so the picker stays usable."""
+        lowered = name.lower()
+        return not any(fragment in lowered for fragment in WATCH_PROVIDER_NAME_SKIP)
 
     async def get_trailer_url(self, provider: str, provider_id: int, media_type: str) -> str | None:
         if provider == "tmdb" and media_type in {"movie", "tv"}:

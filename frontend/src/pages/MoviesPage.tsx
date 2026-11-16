@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
 import { parseWatchProviderId } from '@/utils/watchProviders'
-import { WatchProviderLogo } from '@/components/media/WatchProviderLogo'
+import { OttProviderPicker } from '@/components/media/OttProviderPicker'
 import { MediaCollectionPage } from '@/components/media/MediaCollectionPage'
 import { mediaService } from '@/services/mediaService'
 import type { MovieCollection } from '@/types'
@@ -148,6 +148,9 @@ const MoviesPage = () => {
     if (providerId) nextParams.set('provider_id', providerId.toString())
     else nextParams.delete('provider_id')
     setSearchParams(nextParams)
+    window.requestAnimationFrame(() => {
+      document.getElementById('media-collection-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
   }
 
   const selectRegion = (nextRegion: 'IN' | 'US') => {
@@ -176,86 +179,36 @@ const MoviesPage = () => {
           : `Popular movies available to stream in ${regionLabel}. Choose a service to narrow the list.`
         : selected.description}
       toolbar={(
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Choose a movie collection">
-            {movieCollections.map(({ value, label }) => {
-              const isSelected = collectionForFetch === value
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  aria-pressed={isSelected}
-                  onClick={() => selectCollection(value)}
-                  className={`rounded-full px-3.5 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 ${isSelected ? 'bg-primary-500 text-[#11150d]' : 'border border-border/[0.1] bg-surface text-muted-foreground hover:text-foreground-strong'}`}
-                >
-                  {label}
-                </button>
-              )
-            })}
-          </div>
-          {collectionForFetch === 'ott' && (
-            <section aria-label="Filter by streaming service" className="rounded-xl border border-border/[0.08] bg-surface/55 p-4 sm:p-5">
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-sm font-semibold text-foreground-strong">Choose a streaming service</h2>
-                  <p className="mt-1 text-xs text-muted-foreground">Only services with movie availability in this region are shown.</p>
-                </div>
-                <div className="inline-flex rounded-lg border border-border/[0.1] bg-background p-1" role="group" aria-label="Streaming availability region">
-                  {([
-                    ['IN', 'India'],
-                    ['US', 'United States'],
-                  ] as const).map(([value, label]) => (
-                    <button
-                      key={value}
-                      type="button"
-                      aria-pressed={region === value}
-                      onClick={() => selectRegion(value)}
-                      className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${region === value ? 'bg-surface text-foreground-strong shadow-sm' : 'text-muted-foreground hover:text-foreground-strong'}`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {providersQuery.isLoading ? (
-                <p role="status" className="text-sm text-muted-foreground">Loading services…</p>
-              ) : providersQuery.isError ? (
-                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                  <span>Streaming services couldn’t load.</span>
-                  <button type="button" onClick={() => { void providersQuery.refetch() }} className="font-medium text-foreground-strong underline underline-offset-4">Try again</button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" role="group" aria-label="Streaming providers">
-                  <button
-                    type="button"
-                    aria-pressed={!requestedProviderId}
-                    onClick={() => selectProvider()}
-                    className={`flex min-h-12 items-center gap-2.5 rounded-lg border px-3 py-2 text-left text-sm font-medium transition ${!requestedProviderId ? 'border-primary-500/45 bg-primary-500/[0.08] text-foreground-strong' : 'border-border/[0.1] bg-background/60 text-muted-foreground hover:bg-surface hover:text-foreground-strong'}`}
-                  >
-                    <span className="flex h-7 w-7 items-center justify-center rounded-md bg-surface text-xs font-semibold">All</span>
-                    All services
-                  </button>
-                  {providers.map((provider) => {
-                    const isSelected = requestedProviderId === provider.provider_id
-                    return (
-                      <button
-                        key={provider.provider_id}
-                        type="button"
-                        aria-pressed={isSelected}
-                        onClick={() => selectProvider(provider.provider_id)}
-                        className={`flex min-h-12 min-w-0 items-center gap-2.5 rounded-lg border px-3 py-2 text-left text-sm font-medium transition ${isSelected ? 'border-primary-500/45 bg-primary-500/[0.08] text-foreground-strong' : 'border-border/[0.1] bg-background/60 text-muted-foreground hover:bg-surface hover:text-foreground-strong'}`}
-                      >
-                        <WatchProviderLogo provider={provider} size="sm" />
-                        <span className="truncate">{provider.provider_name}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-            </section>
-          )}
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Choose a movie collection">
+          {movieCollections.map(({ value, label }) => {
+            const isSelected = collectionForFetch === value
+            return (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={isSelected}
+                onClick={() => selectCollection(value)}
+                className={`rounded-full px-3.5 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 ${isSelected ? 'bg-primary-500 text-[#11150d]' : 'border border-border/[0.1] bg-surface text-muted-foreground hover:text-foreground-strong'}`}
+              >
+                {label}
+              </button>
+            )
+          })}
         </div>
       )}
+      filters={collectionForFetch === 'ott' ? (
+        <OttProviderPicker
+          region={region}
+          regionLabel={regionLabel}
+          providers={providers}
+          selectedProviderId={requestedProviderId}
+          isLoading={providersQuery.isLoading}
+          isError={providersQuery.isError}
+          onRetry={() => { void providersQuery.refetch() }}
+          onSelectRegion={selectRegion}
+          onSelectProvider={selectProvider}
+        />
+      ) : undefined}
     />
   )
 }

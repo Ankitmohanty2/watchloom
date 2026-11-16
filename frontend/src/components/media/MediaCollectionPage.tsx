@@ -17,6 +17,7 @@ interface MediaCollectionPageProps {
   providerId?: number
   region?: string
   toolbar?: ReactNode
+  filters?: ReactNode
 }
 
 export const MediaCollectionPage = ({
@@ -28,9 +29,11 @@ export const MediaCollectionPage = ({
   providerId,
   region = 'IN',
   toolbar,
+  filters,
 }: MediaCollectionPageProps) => {
   const {
     data,
+    isPending,
     isLoading,
     isError,
     refetch,
@@ -46,8 +49,6 @@ export const MediaCollectionPage = ({
     getNextPageParam: (lastPage) => lastPage.has_next_page ? lastPage.page + 1 : undefined,
   })
 
-  const isRefreshing = isFetching && !isLoading && !isFetchingNextPage
-
   const items: Media[] = useMemo(() => {
     const seen = new Set<string>()
     return (data?.pages.flatMap((page) => page.results) ?? []).filter((media) => {
@@ -57,6 +58,9 @@ export const MediaCollectionPage = ({
       return true
     })
   }, [data])
+
+  const isRefreshing = isFetching && !isLoading && !isFetchingNextPage
+  const awaitingFirstPage = isPending || (isFetching && items.length === 0 && !isFetchingNextPage)
 
   return (
     <main className="min-h-[65vh] bg-background text-foreground">
@@ -76,7 +80,9 @@ export const MediaCollectionPage = ({
           )}
         </header>
 
-        {isLoading ? (
+        {filters && <div className="mb-8">{filters}</div>}
+
+        {awaitingFirstPage ? (
           <MediaGridSkeleton count={18} />
         ) : isError ? (
           <div className="rounded-xl border border-border/[0.08] bg-surface px-6 py-14 text-center">
@@ -87,7 +93,7 @@ export const MediaCollectionPage = ({
             </button>
           </div>
         ) : items.length > 0 ? (
-          <>
+          <section id="media-collection-results" aria-label="Title results">
             {isRefreshing && (
               <p role="status" className="mb-4 text-sm text-muted-foreground">Updating titles for this service…</p>
             )}
@@ -116,11 +122,15 @@ export const MediaCollectionPage = ({
                 <p className="text-xs text-muted-foreground">{items.length} titles loaded so far</p>
               </div>
             )}
-          </>
+          </section>
         ) : (
-          <div className="rounded-xl border border-border/[0.08] bg-surface px-6 py-14 text-center">
+          <div id="media-collection-results" className="rounded-xl border border-border/[0.08] bg-surface px-6 py-14 text-center">
             <h2 className="font-display text-xl font-semibold text-foreground-strong">Nothing to show yet</h2>
-            <p className="mt-2 text-sm text-muted">Explore all titles to find something to add to your list.</p>
+            <p className="mt-2 text-sm text-muted">
+              {collection === 'ott' && providerId
+                ? 'TMDB did not return movies for this service in that region. Try another service or region.'
+                : 'Explore all titles to find something to add to your list.'}
+            </p>
             <Link to="/discover" className="mt-5 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-[#11150d]" style={{ backgroundColor: 'var(--watchloom-primary)' }}>
               Go to Discover <ArrowRight className="h-4 w-4" />
             </Link>
