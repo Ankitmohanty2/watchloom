@@ -3,6 +3,7 @@
 from datetime import datetime
 from typing import Any
 
+
 class SiteIssueModel:
     """Create and serialize site issue documents."""
 
