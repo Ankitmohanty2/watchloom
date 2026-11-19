@@ -17,6 +17,7 @@ Watchloom brings movies, TV series, and anime together in one place. Discover so
   <img src="screenshot/title-details.png" alt="Watchloom title details page" width="49%" />
 </p>
 
+
 ## What you can do
 
 - Browse and search movies, series, and anime, including titles from around the world.
